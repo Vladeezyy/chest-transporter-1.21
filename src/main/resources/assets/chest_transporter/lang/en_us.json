@@ -1,0 +1,21 @@
+{
+  "item.chest_transporter.wooden_chest_transporter": "Wooden Chest Transporter",
+  "item.chest_transporter.copper_chest_transporter": "Copper Chest Transporter",
+  "item.chest_transporter.iron_chest_transporter": "Iron Chest Transporter",
+  "item.chest_transporter.golden_chest_transporter": "Golden Chest Transporter",
+  "item.chest_transporter.diamond_chest_transporter": "Diamond Chest Transporter",
+  "item.chest_transporter.netherite_chest_transporter": "Netherite Chest Transporter",
+  "item.chest_transporter.empty": "Right-click a chest, barrel or spawner to load it",
+  "item.chest_transporter.carrying": "Carrying: %s",
+  "item.chest_transporter.stacks": "%s stacks inside",
+  "item.chest_transporter.loot": "Unopened loot",
+  "item.chest_transporter.spawner": "Spawns: %s",
+  "item.chest_transporter.moves_left": "Moves left: %s",
+  "message.chest_transporter.not_transportable": "This block cannot be carried",
+  "message.chest_transporter.spawner_disabled": "Spawners cannot be carried on this server",
+  "message.chest_transporter.spawner_tier": "This truck is not strong enough for a spawner",
+  "message.chest_transporter.protected": "You are not allowed to do that here",
+  "message.chest_transporter.locked": "This container is locked",
+  "message.chest_transporter.too_heavy": "Too much inside to carry",
+  "message.chest_transporter.no_room": "No room to put it down here"
+}

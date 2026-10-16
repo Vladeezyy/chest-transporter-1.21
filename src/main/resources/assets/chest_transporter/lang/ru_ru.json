@@ -1,0 +1,21 @@
+{
+  "item.chest_transporter.wooden_chest_transporter": "Деревянная тележка для сундуков",
+  "item.chest_transporter.copper_chest_transporter": "Медная тележка для сундуков",
+  "item.chest_transporter.iron_chest_transporter": "Железная тележка для сундуков",
+  "item.chest_transporter.golden_chest_transporter": "Золотая тележка для сундуков",
+  "item.chest_transporter.diamond_chest_transporter": "Алмазная тележка для сундуков",
+  "item.chest_transporter.netherite_chest_transporter": "Незеритовая тележка для сундуков",
+  "item.chest_transporter.empty": "ПКМ по сундуку, бочке или рассаднику — погрузить",
+  "item.chest_transporter.carrying": "Везёт: %s",
+  "item.chest_transporter.stacks": "Внутри стаков: %s",
+  "item.chest_transporter.loot": "Неоткрытая добыча",
+  "item.chest_transporter.spawner": "Призывает: %s",
+  "item.chest_transporter.moves_left": "Осталось перевозок: %s",
+  "message.chest_transporter.not_transportable": "Этот блок нельзя увезти",
+  "message.chest_transporter.spawner_disabled": "На этом сервере рассадники перевозить нельзя",
+  "message.chest_transporter.spawner_tier": "Эта тележка слишком слабая для рассадника",
+  "message.chest_transporter.protected": "Здесь вам это делать нельзя",
+  "message.chest_transporter.locked": "Этот контейнер заперт",
+  "message.chest_transporter.too_heavy": "Внутри слишком много, не увезти",
+  "message.chest_transporter.no_room": "Здесь некуда поставить"
+}

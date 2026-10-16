@@ -1,0 +1,28 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="${mod_license}"
+issueTrackerURL="https://github.com/Vladeezyy/chest-transporter-1.21/issues"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+authors="${mod_authors}"
+credits="The idea of carrying chests with their contents comes from Chest Transporter by cubex2 (Minecraft 1.12.2); this mod is written from scratch."
+description='''
+A hand truck that picks up chests, barrels and spawners with everything inside and puts them down somewhere else.
+'''
+
+[[dependencies.${mod_id}]]
+    modId="neoforge"
+    type="required"
+    versionRange="${neo_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    type="required"
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"

@@ -1,0 +1,21 @@
+{
+  "item.chest_transporter.wooden_chest_transporter": "Hölzerne Truhenkarre",
+  "item.chest_transporter.copper_chest_transporter": "Kupferne Truhenkarre",
+  "item.chest_transporter.iron_chest_transporter": "Eiserne Truhenkarre",
+  "item.chest_transporter.golden_chest_transporter": "Goldene Truhenkarre",
+  "item.chest_transporter.diamond_chest_transporter": "Diamantene Truhenkarre",
+  "item.chest_transporter.netherite_chest_transporter": "Netherit-Truhenkarre",
+  "item.chest_transporter.empty": "Rechtsklick auf eine Truhe, ein Fass oder einen Spawner zum Aufladen",
+  "item.chest_transporter.carrying": "Geladen: %s",
+  "item.chest_transporter.stacks": "%s Stapel darin",
+  "item.chest_transporter.loot": "Ungeöffnete Beute",
+  "item.chest_transporter.spawner": "Erzeugt: %s",
+  "item.chest_transporter.moves_left": "Verbleibende Fahrten: %s",
+  "message.chest_transporter.not_transportable": "Dieser Block kann nicht transportiert werden",
+  "message.chest_transporter.spawner_disabled": "Spawner können auf diesem Server nicht transportiert werden",
+  "message.chest_transporter.spawner_tier": "Diese Karre ist für einen Spawner nicht stark genug",
+  "message.chest_transporter.protected": "Das darfst du hier nicht",
+  "message.chest_transporter.locked": "Dieser Behälter ist verschlossen",
+  "message.chest_transporter.too_heavy": "Zu viel Inhalt zum Transportieren",
+  "message.chest_transporter.no_room": "Hier ist kein Platz zum Abstellen"
+}

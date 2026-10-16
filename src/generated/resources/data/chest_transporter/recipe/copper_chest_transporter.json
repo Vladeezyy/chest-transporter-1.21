@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "M": {
+      "item": "minecraft:copper_ingot"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "pattern": [
+    "S S",
+    "S S",
+    "MMM"
+  ],
+  "result": {
+    "count": 1,
+    "id": "chest_transporter:copper_chest_transporter"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "item.chest_transporter.wooden_chest_transporter": "Дерев’яний візок для скринь",
+  "item.chest_transporter.copper_chest_transporter": "Мідний візок для скринь",
+  "item.chest_transporter.iron_chest_transporter": "Залізний візок для скринь",
+  "item.chest_transporter.golden_chest_transporter": "Золотий візок для скринь",
+  "item.chest_transporter.diamond_chest_transporter": "Діамантовий візок для скринь",
+  "item.chest_transporter.netherite_chest_transporter": "Незеритовий візок для скринь",
+  "item.chest_transporter.empty": "ПКМ по скрині, діжці чи породжувачу — завантажити",
+  "item.chest_transporter.carrying": "Везе: %s",
+  "item.chest_transporter.stacks": "Стосів усередині: %s",
+  "item.chest_transporter.loot": "Невідкрита здобич",
+  "item.chest_transporter.spawner": "Породжує: %s",
+  "item.chest_transporter.moves_left": "Залишилося перевезень: %s",
+  "message.chest_transporter.not_transportable": "Цей блок не можна перевезти",
+  "message.chest_transporter.spawner_disabled": "На цьому сервері породжувачі перевозити не можна",
+  "message.chest_transporter.spawner_tier": "Цей візок заслабкий для породжувача",
+  "message.chest_transporter.protected": "Тут вам цього робити не можна",
+  "message.chest_transporter.locked": "Цей контейнер замкнено",
+  "message.chest_transporter.too_heavy": "Усередині забагато, не перевезти",
+  "message.chest_transporter.no_room": "Тут немає місця, щоб поставити"
+}

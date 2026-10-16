@@ -1,0 +1,21 @@
+{
+  "item.chest_transporter.wooden_chest_transporter": "Carrinho de Baús de Madeira",
+  "item.chest_transporter.copper_chest_transporter": "Carrinho de Baús de Cobre",
+  "item.chest_transporter.iron_chest_transporter": "Carrinho de Baús de Ferro",
+  "item.chest_transporter.golden_chest_transporter": "Carrinho de Baús de Ouro",
+  "item.chest_transporter.diamond_chest_transporter": "Carrinho de Baús de Diamante",
+  "item.chest_transporter.netherite_chest_transporter": "Carrinho de Baús de Netherite",
+  "item.chest_transporter.empty": "Clique com o botão direito num baú, barril ou gerador para carregá-lo",
+  "item.chest_transporter.carrying": "Carregando: %s",
+  "item.chest_transporter.stacks": "%s pilhas dentro",
+  "item.chest_transporter.loot": "Saque não aberto",
+  "item.chest_transporter.spawner": "Gera: %s",
+  "item.chest_transporter.moves_left": "Viagens restantes: %s",
+  "message.chest_transporter.not_transportable": "Este bloco não pode ser carregado",
+  "message.chest_transporter.spawner_disabled": "Geradores não podem ser carregados neste servidor",
+  "message.chest_transporter.spawner_tier": "Este carrinho não é forte o bastante para um gerador",
+  "message.chest_transporter.protected": "Você não pode fazer isso aqui",
+  "message.chest_transporter.locked": "Este recipiente está trancado",
+  "message.chest_transporter.too_heavy": "Há coisas demais dentro para carregar",
+  "message.chest_transporter.no_room": "Não há espaço para colocá-lo aqui"
+}
