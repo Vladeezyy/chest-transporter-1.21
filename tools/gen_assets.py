@@ -111,12 +111,12 @@ def frame_model(tier):
 DISPLAY = {
     'gui': {'rotation': [30, 225, 0], 'translation': [0, 0, 0], 'scale': [0.625, 0.625, 0.625]},
     'ground': {'rotation': [0, 0, 0], 'translation': [0, 3, 0], 'scale': [0.25, 0.25, 0.25]},
-    'fixed': {'rotation': [0, 0, 0], 'translation': [0, 0, 0], 'scale': [0.5, 0.5, 0.5]},
+    'fixed': {'rotation': [30, 225, 0], 'translation': [0, 0, 0], 'scale': [0.6, 0.6, 0.6]},
     'head': {'rotation': [0, 180, 0], 'translation': [0, 0, 0], 'scale': [1, 1, 1]},
-    'thirdperson_righthand': {'rotation': [75, 45, 0], 'translation': [0, 2.5, 0], 'scale': [0.375, 0.375, 0.375]},
-    'thirdperson_lefthand': {'rotation': [75, 45, 0], 'translation': [0, 2.5, 0], 'scale': [0.375, 0.375, 0.375]},
-    'firstperson_righthand': {'rotation': [0, 45, 0], 'translation': [0, 0, 0], 'scale': [0.4, 0.4, 0.4]},
-    'firstperson_lefthand': {'rotation': [0, 225, 0], 'translation': [0, 0, 0], 'scale': [0.4, 0.4, 0.4]},
+    'thirdperson_righthand': {'rotation': [-15, 90, 0], 'translation': [0, -5, 3], 'scale': [0.6, 0.6, 0.6]},
+    'thirdperson_lefthand': {'rotation': [-15, -90, 0], 'translation': [0, -5, 3], 'scale': [0.6, 0.6, 0.6]},
+    'firstperson_righthand': {'rotation': [0, 135, 0], 'translation': [2, 2, -1], 'scale': [0.35, 0.35, 0.35]},
+    'firstperson_lefthand': {'rotation': [0, 225, 0], 'translation': [2, 2, -1], 'scale': [0.35, 0.35, 0.35]},
 }
 
 
