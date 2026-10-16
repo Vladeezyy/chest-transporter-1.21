@@ -23,8 +23,9 @@
 
 | Version | Minecraft | Loader | Java |
 | --- | --- | --- | --- |
-| 1.0.0+1.21.1 | 1.21.1 | NeoForge 21.1.197 or newer | 21 |
-| 1.0.0+1.21.1 | 1.21.1 | Fabric Loader 0.16.14 or newer + [Fabric API](https://modrinth.com/mod/fabric-api) | 21 |
+| 1.0.1+1.21.1 | 1.21.1 | NeoForge 21.1.197 or newer | 21 |
+| 1.0.1+1.21.1 | 1.21.1 | Fabric Loader 0.16.14 or newer + [Fabric API](https://modrinth.com/mod/fabric-api) | 21 |
+| 1.0.0+1.21.1 | 1.21.1 | NeoForge 21.1.197 or newer (first release) | 21 |
 
 Releases: [GitHub releases](../../releases) — `ChestTransporter-neoforge-…` or `ChestTransporter-fabric-…`. Install on the
 server **and** on every client. Both work the same and read the same config file.
@@ -85,8 +86,9 @@ was built and tested: [DEVLOG.md](DEVLOG.md).
 
 | Версия | Minecraft | Загрузчик | Java |
 | --- | --- | --- | --- |
-| 1.0.0+1.21.1 | 1.21.1 | NeoForge 21.1.197 или новее | 21 |
-| 1.0.0+1.21.1 | 1.21.1 | Fabric Loader 0.16.14 или новее + [Fabric API](https://modrinth.com/mod/fabric-api) | 21 |
+| 1.0.1+1.21.1 | 1.21.1 | NeoForge 21.1.197 или новее | 21 |
+| 1.0.1+1.21.1 | 1.21.1 | Fabric Loader 0.16.14 или новее + [Fabric API](https://modrinth.com/mod/fabric-api) | 21 |
+| 1.0.0+1.21.1 | 1.21.1 | NeoForge 21.1.197 или новее (первый релиз) | 21 |
 
 Релизы: [GitHub releases](../../releases) — `ChestTransporter-neoforge-…` или `ChestTransporter-fabric-…`. Ставить на
 сервер **и** на каждый клиент. Обе версии работают одинаково и читают один и тот же файл конфига.
