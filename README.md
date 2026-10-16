@@ -1,11 +1,12 @@
 <div align="center">
 
-# Chest Transporter — NeoForge 1.21.1
+# Chest Transporter — NeoForge & Fabric 1.21.1
 
 **A hand truck that picks up chests, barrels and spawners with everything inside and puts them down somewhere else.**
 
 [![Minecraft 1.21.1](https://img.shields.io/badge/Minecraft-1.21.1-3c8527)](https://www.minecraft.net)
 [![NeoForge 21.1](https://img.shields.io/badge/NeoForge-21.1.197%2B-e0682b)](https://neoforged.net)
+[![Fabric](https://img.shields.io/badge/Fabric-0.16.14%2B-dbd0b4)](https://fabricmc.net)
 [![License LGPL-3.0](https://img.shields.io/badge/license-LGPL--3.0-blue)](LICENSE)
 
 <img src="docs/images/ground_frames.jpg" width="49%" alt="Hand trucks of every tier with a chest, a barrel and a spawner">
@@ -23,8 +24,10 @@
 | Version | Minecraft | Loader | Java |
 | --- | --- | --- | --- |
 | 1.0.0+1.21.1 | 1.21.1 | NeoForge 21.1.197 or newer | 21 |
+| 1.0.0+1.21.1 | 1.21.1 | Fabric Loader 0.16.14 or newer + [Fabric API](https://modrinth.com/mod/fabric-api) | 21 |
 
-Releases: [GitHub releases](../../releases). Install on the server **and** on every client.
+Releases: [GitHub releases](../../releases) — `ChestTransporter-neoforge-…` or `ChestTransporter-fabric-…`. Install on the
+server **and** on every client. Both work the same and read the same config file.
 
 ## How it works
 
@@ -36,8 +39,8 @@ Releases: [GitHub releases](../../releases). Install on the server **and** on ev
   minecart with a carried chest to put it back.
 - **Heavy:** while a loaded truck is anywhere in your inventory you walk and mine slower, cannot jump up a full block
   and get hungry faster (not in creative mode).
-- **Safe:** protected areas (spawn protection, claim mods that cancel block breaking), locked containers and contents
-  over the size limit are refused with a message.
+- **Safe:** protected areas (spawn protection, claim mods that cancel block breaking; on NeoForge also block placing),
+  locked containers and contents over the size limit are refused with a message.
 - Each put down costs one point of durability. Trucks are repaired in an anvil with their material.
 
 ## Trucks
@@ -53,7 +56,7 @@ Releases: [GitHub releases](../../releases). Install on the server **and** on ev
 
 ## Config
 
-`config/chest_transporter-server.toml` (synced to the clients):
+`config/chest_transporter-server.toml`, the same on both loaders (sent to the clients when they join):
 - `pickup.spawners` — spawners can be carried at all (default `true`);
 - `pickup.spawnerTiers` — trucks that take spawners (default: all);
 - `pickup.maxDataKiB` — largest load in KiB (default 1024), so the item can always be sent to clients;
@@ -70,7 +73,7 @@ English, Russian, Ukrainian, German, Spanish, Brazilian Portuguese.
 
 [LGPL-3.0-only](LICENSE). The idea of carrying chests with their contents comes from
 [Chest Transporter](https://www.curseforge.com/minecraft/mc-mods/chest-transporter) by **cubex2** (Minecraft 1.12.2).
-This mod is written from scratch for NeoForge 1.21.1: its code, model and textures are new. Made by Vladeezyy; how it
+This mod is written from scratch for NeoForge and Fabric 1.21.1: its code, model and textures are new. Made by Vladeezyy; how it
 was built and tested: [DEVLOG.md](DEVLOG.md).
 
 </details>
@@ -83,8 +86,10 @@ was built and tested: [DEVLOG.md](DEVLOG.md).
 | Версия | Minecraft | Загрузчик | Java |
 | --- | --- | --- | --- |
 | 1.0.0+1.21.1 | 1.21.1 | NeoForge 21.1.197 или новее | 21 |
+| 1.0.0+1.21.1 | 1.21.1 | Fabric Loader 0.16.14 или новее + [Fabric API](https://modrinth.com/mod/fabric-api) | 21 |
 
-Релизы: [GitHub releases](../../releases). Ставить на сервер **и** на каждый клиент.
+Релизы: [GitHub releases](../../releases) — `ChestTransporter-neoforge-…` или `ChestTransporter-fabric-…`. Ставить на
+сервер **и** на каждый клиент. Обе версии работают одинаково и читают один и тот же файл конфига.
 
 ## Как работает
 
@@ -96,8 +101,8 @@ was built and tested: [DEVLOG.md](DEVLOG.md).
   тележке по обычной вагонетке — вернуть его.
 - **Тяжело:** пока гружёная тележка где-то в инвентаре, вы медленнее ходите и копаете, не запрыгиваете на целый блок и
   быстрее голодаете (кроме творческого режима).
-- **Безопасно:** защищённые места (защита спавна, приваты, отменяющие ломание блоков), запертые контейнеры и слишком
-  большое содержимое — отказ с сообщением.
+- **Безопасно:** защищённые места (защита спавна, приваты, отменяющие ломание блоков; на NeoForge ещё и установку),
+  запертые контейнеры и слишком большое содержимое — отказ с сообщением.
 - Каждая установка тратит единицу прочности. Чинится на наковальне своим материалом.
 
 ## Тележки
@@ -113,7 +118,7 @@ was built and tested: [DEVLOG.md](DEVLOG.md).
 
 ## Конфиг
 
-`config/chest_transporter-server.toml` (передаётся клиентам):
+`config/chest_transporter-server.toml`, одинаковый на обоих загрузчиках (сервер отправляет его клиентам при входе):
 - `pickup.spawners` — можно ли вообще возить рассадники (по умолчанию `true`);
 - `pickup.spawnerTiers` — какие тележки берут рассадники (по умолчанию все);
 - `pickup.maxDataKiB` — наибольший груз в КиБ (по умолчанию 1024), чтобы предмет всегда доходил до клиентов;
@@ -130,7 +135,7 @@ was built and tested: [DEVLOG.md](DEVLOG.md).
 
 [LGPL-3.0-only](LICENSE). Идея возить сундуки с содержимым взята из
 [Chest Transporter](https://www.curseforge.com/minecraft/mc-mods/chest-transporter) от **cubex2** (Minecraft 1.12.2).
-Этот мод написан с нуля для NeoForge 1.21.1: код, модель и текстуры новые. Автор — Vladeezyy; как делали и проверяли:
+Этот мод написан с нуля для NeoForge и Fabric 1.21.1: код, модель и текстуры новые. Автор — Vladeezyy; как делали и проверяли:
 [DEVLOG.md](DEVLOG.md).
 
 </details>

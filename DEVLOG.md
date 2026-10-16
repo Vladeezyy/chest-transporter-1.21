@@ -1,4 +1,4 @@
-# Chest Transporter for NeoForge 1.21.1: development log
+# Chest Transporter for NeoForge and Fabric 1.21.1: development log
 
 ## Origin and scope (2026-10-16)
 
@@ -12,6 +12,24 @@ Decided with the owner:
 - vanilla containers (chest, trapped chest, barrel, minecart with chest) and spawners; other mods' containers can be
   added to the block tag `chest_transporter:transportable` by packs, there is no code per mod;
 - an own model: a hand truck with the load standing on its plate.
+
+## Fabric (2026-10-16)
+
+One repository for both loaders, after our Iron Backpacks MultiLoader setup: `common` (vanilla code on NeoForm, the
+resources and the datagen output), `neoforge` and `fabric`. Decided with the owner: one repository, an own small
+config instead of Forge Config API Port, protections through the block break event plus the vanilla build checks.
+- `Platform` (found with `ServiceLoader`): registration, config folder, break check, place guard, sending packets;
+  `ClientPlatform`: the frame model.
+- Clicks: NeoForge `RightClickBlock` / `EntityInteract`, Fabric `UseBlockCallback` / `UseEntityCallback`, all calling
+  `Transport.onUseBlock` and `MinecartTransport.onUseEntity`. Player ticks: NeoForge `PlayerTickEvent`, Fabric server
+  tick over the players and the client tick for the local player.
+- Config: the same `config/chest_transporter-server.toml` and keys as the NeoForge config of 1.0.0 (old files are read),
+  a lenient reader that resets wrong types and clamps numbers, sent to each joining client (`chest_transporter:config`).
+- Vanilla instead of NeoForge-only API: own quad loop instead of `renderModelLists` (private in vanilla), the vanilla
+  `renderSingleBlock` and `getSoundType`, the vanilla block entity item renderer for chests on the truck.
+- Fabric has no block place event: placing relies on `mayUseItemAt`/`mayInteract`, like vanilla blocks.
+- Tests: the shared checks live in `common/src/selftest`, each loader wires them to its events (NeoForge
+  `NeoForgeTestHooks`, Fabric a second dev-only mod `chest_transporter_selftest`); `tools/*.sh` take `LOADER=fabric`.
 
 ## Design
 
@@ -29,6 +47,8 @@ Decided with the owner:
 
 ## Verification
 
+Every test below runs on both loaders (`LOADER=fabric tools/…`), with the same results.
+
 - `tools/selftest.sh`: dev server, 26 checks — registries, durability per tier, recipes, repair, chest with items and
   name picked up and put down, facing, double chest halves and joining, barrel facing, loot table kept, spawner and its
   mob, spawner config and tier list, locked and protected chests, other blocks, size limit, no room, wooden truck
@@ -41,14 +61,15 @@ Decided with the owner:
   losing an item, empty spawner tier list, leaving and rejoining with a loaded truck.
 - `tools/nettest.sh`: dev client on a dev dedicated server, clicking like a player — 10 checks (pick up, client
   slowness, put down, opening the moved chest, spawner refused by the server config, minecart both ways).
-- Release jar on dedicated NeoForge 21.1.197 and 21.1.259 servers (`prodtest/serve.sh`).
+- Release jars: NeoForge on dedicated NeoForge 21.1.197 and 21.1.259 servers (`prodtest/serve.sh`), Fabric on a
+  production Fabric server with Fabric API (`prodtest/serve-fabric.sh`, Loom's `prodServer`).
 
 ## Performance (MacBook, dev client, 1600×900)
 
 | Measured | Result |
 | --- | --- |
-| 128 loaded trucks as items and in item frames | 216 FPS against 224 FPS for the same 128 blocks without trucks (96 %) |
-| Carrying effects handler, per player per tick | 1.2 µs with a loaded truck, 2.1 µs without (limit in the test: 5 µs) |
+| 128 loaded trucks as items and in item frames | NeoForge 222 FPS against 234, Fabric 221 FPS against 225 for the same 128 blocks without trucks |
+| Carrying effects handler, per player per tick | NeoForge 0.9 µs loaded / 1.2 µs empty, Fabric 0.9 / 0.7 µs (limit in the test: 5 µs) |
 | Server tick of a dev world, one player | 11.5 ms idle, 13.0 ms carrying (noise of chunk loading; the handler itself is the line above) |
 
 Before the optimizations (inventory scan every tick, 54 quads, new item stack per frame) the same scene ran at 149 FPS
