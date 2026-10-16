@@ -52,10 +52,10 @@ def texture(tier, palette):
             px[x, y] = shade(g, rnd.randint(-4, 4))
     # wheel side: u 8-12, v 0-4, a round tire with a hub in the tier color
     wheel = [
-        '.TT.',
+        'TTTT',
         'THHT',
         'THHT',
-        '.TT.',
+        'TTTT',
     ]
     for dy, row in enumerate(wheel):
         for dx, ch in enumerate(row):
@@ -63,10 +63,10 @@ def texture(tier, palette):
                 px[8 + dx, dy] = shade(TIRE[0], 0)
             elif ch == 'H':
                 px[8 + dx, dy] = shade(light if dx == 1 and dy == 1 else base, 0)
-    # tread: u 12-16, v 0-4
+    # tread: u 12-16, v 0-4, rubber with grooves across (a checker here reads as the missing texture)
     for x in range(12, 16):
         for y in range(4):
-            px[x, y] = shade(TIRE[2] if (x + y) % 2 else TIRE[1], 0)
+            px[x, y] = shade(TIRE[2] if y % 2 else TIRE[0], 0)
     # axle: u 8-16, v 4-5
     for x in range(8, 16):
         px[x, 4] = shade(TIRE[1], 0)
@@ -78,10 +78,14 @@ def box(frm, to, faces):
     return {'from': frm, 'to': to, 'faces': faces}
 
 
-def metal_faces(u0=0, v0=0, size=(2, 8)):
+ALL = ('north', 'south', 'east', 'west', 'up', 'down')
+
+
+def metal_faces(u0=0, v0=0, size=(2, 8), skip=()):
+    """Faces of a metal bar; faces that always touch another part are left out (fewer quads to draw)"""
     w, h = size
     uv = [u0, v0, u0 + w, v0 + h]
-    return {d: {'uv': uv, 'texture': '#truck'} for d in ('north', 'south', 'east', 'west', 'up', 'down')}
+    return {d: {'uv': uv, 'texture': '#truck'} for d in ALL if d not in skip}
 
 
 def frame_model(tier):
@@ -91,14 +95,16 @@ def frame_model(tier):
         # toe plate the load stands on
         box([2, 0, 1], [14, 1, 13], {**metal_faces(0, 0, (8, 1)), 'up': plate_top}),
         # rails and cross bars behind the load
-        box([2, 0, 13], [3, 15, 14], metal_faces(0, 0, (1, 8))),
-        box([13, 0, 13], [14, 15, 14], metal_faces(1, 0, (1, 8))),
-        box([3, 5, 13], [13, 6, 14], metal_faces(0, 3, (8, 1))),
-        box([3, 10, 13], [13, 11, 14], metal_faces(0, 5, (8, 1))),
+        box([2, 0, 13], [3, 15, 14], metal_faces(0, 0, (1, 8), skip=('up',))),
+        box([13, 0, 13], [14, 15, 14], metal_faces(1, 0, (1, 8), skip=('up',))),
+        # cross bars end inside the rails
+        box([3, 5, 13], [13, 6, 14], metal_faces(0, 3, (8, 1), skip=('east', 'west'))),
+        box([3, 10, 13], [13, 11, 14], metal_faces(0, 5, (8, 1), skip=('east', 'west'))),
         # handle with the grip
         box([2, 15, 13], [14, 16, 14], {d: {'uv': [0, 8, 8, 9], 'texture': '#truck'} for d in ('north', 'south', 'east', 'west', 'up', 'down')}),
         # axle and wheels
-        box([1, 1, 14], [15, 2, 15], {d: {'uv': [8, 4, 16, 5], 'texture': '#truck'} for d in ('north', 'south', 'east', 'west', 'up', 'down')}),
+        # the axle ends inside the wheels
+        box([1, 1, 14], [15, 2, 15], {d: {'uv': [8, 4, 16, 5], 'texture': '#truck'} for d in ('north', 'south', 'up', 'down')}),
     ]
     for x0 in (0, 14.5):
         side = {'uv': [8, 0, 12, 4], 'texture': '#truck'}
@@ -111,7 +117,7 @@ def frame_model(tier):
 DISPLAY = {
     'gui': {'rotation': [30, 225, 0], 'translation': [0, 0, 0], 'scale': [0.625, 0.625, 0.625]},
     'ground': {'rotation': [0, 0, 0], 'translation': [0, 3, 0], 'scale': [0.25, 0.25, 0.25]},
-    'fixed': {'rotation': [30, 225, 0], 'translation': [0, 0, 0], 'scale': [0.6, 0.6, 0.6]},
+    'fixed': {'rotation': [0, 90, 0], 'translation': [0, 0, 0], 'scale': [0.7, 0.7, 0.7]},
     'head': {'rotation': [0, 180, 0], 'translation': [0, 0, 0], 'scale': [1, 1, 1]},
     'thirdperson_righthand': {'rotation': [-15, 90, 0], 'translation': [0, -5, 3], 'scale': [0.6, 0.6, 0.6]},
     'thirdperson_lefthand': {'rotation': [-15, -90, 0], 'translation': [0, -5, 3], 'scale': [0.6, 0.6, 0.6]},

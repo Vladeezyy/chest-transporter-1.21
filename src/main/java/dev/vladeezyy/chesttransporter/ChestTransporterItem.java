@@ -53,6 +53,7 @@ public class ChestTransporterItem extends Item {
       Transport.Result result = Transport.pickUp(context.getLevel(), context.getClickedPos(), player, tier);
       if (result.carried() != null) {
         stack.set(ModRegistry.CARRIED, result.carried());
+        CarryEffects.invalidate(player);
       } else {
         player.displayClientMessage(result.message(), true);
       }
@@ -67,6 +68,7 @@ public class ChestTransporterItem extends Item {
       return InteractionResult.FAIL;
     }
     stack.remove(ModRegistry.CARRIED);
+    CarryEffects.invalidate(player);
     stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(context.getHand()));
     return InteractionResult.CONSUME;
   }

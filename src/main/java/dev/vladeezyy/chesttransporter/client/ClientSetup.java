@@ -17,6 +17,7 @@ public final class ClientSetup {
   public static void init(IEventBus modBus) {
     modBus.addListener(ClientSetup::additionalModels);
     modBus.addListener(ClientSetup::itemExtensions);
+    modBus.addListener((ModelEvent.BakingCompleted event) -> TransporterRenderer.modelsBaked());
   }
 
   /** The truck without its load, rendered by {@link TransporterRenderer} */

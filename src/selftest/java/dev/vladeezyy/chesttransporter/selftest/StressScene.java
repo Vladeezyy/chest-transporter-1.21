@@ -108,6 +108,47 @@ public final class StressScene {
     return fps;
   }
 
+  private static double msptIdle;
+  private static long tickNanosSum;
+  private static int tickSamples;
+
+  private static void msptStart(Minecraft mc) {
+    tickNanosSum = 0;
+    tickSamples = 0;
+    measuringTicks = true;
+  }
+
+  private static boolean measuringTicks;
+
+  @SubscribeEvent
+  public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+    if (ENABLED && measuringTicks) {
+      // the server's own average over its last 100 ticks, sampled every tick
+      tickNanosSum += event.getServer().getAverageTickTimeNanos();
+      tickSamples++;
+    }
+  }
+
+  private static double mspt(Minecraft mc, String name) {
+    measuringTicks = false;
+    double mspt = tickSamples == 0 ? 0 : tickNanosSum / (double) tickSamples / 1e6;
+    ChestTransporter.LOG.info(String.format("[scene] PERF %s: %.3f ms per server tick", name, mspt));
+    return mspt;
+  }
+
+  /** Average time of the player tick handler of the mod, in microseconds, over 20000 calls */
+  private static double handlerMicros(ServerPlayer player) {
+    var event = new net.neoforged.neoforge.event.tick.PlayerTickEvent.Post(player);
+    for (int i = 0; i < 2000; i++) {
+      CarryEffects.tick(event);
+    }
+    long start = System.nanoTime();
+    for (int i = 0; i < 20000; i++) {
+      CarryEffects.tick(event);
+    }
+    return (System.nanoTime() - start) / 20000.0 / 1000.0;
+  }
+
   private static void startMeasure() {
     frames = 0;
     measureStart = System.nanoTime();
@@ -123,16 +164,34 @@ public final class StressScene {
         && TransporterConfig.SPAWNER_TIERS.get().size() == 6, TransporterConfig.maxDataBytes());
       server(mc, StressScene::floor);
     });
-    at(t += 40, mc -> server(mc, p -> showcase(p, false)));
+    // server tick time: idle, then with a loaded truck in the inventory (the effects run every tick)
+    at(t += 20, mc -> msptStart(mc));
+    at(t += 100, mc -> {
+      msptIdle = mspt(mc, "idle player");
+      server(mc, p -> p.getInventory().setItem(20, loaded(TransporterTier.IRON, Blocks.CHEST)));
+    });
+    at(t += 20, mc -> msptStart(mc));
+    at(t += 100, mc -> {
+      mspt(mc, "player carrying a loaded truck");
+      // the whole server tick is noisy in a dev world: time the effects handler itself
+      server(mc, p -> {
+        double carrying = handlerMicros(p);
+        p.getInventory().setItem(20, ItemStack.EMPTY);
+        double empty = handlerMicros(p);
+        ChestTransporter.LOG.info(String.format("[scene] PERF carrying effects handler per player tick: %.3f us loaded, %.3f us empty", carrying, empty));
+        check("carrying effects cost under 5 microseconds per player tick", carrying < 5 && empty < 5, carrying + " / " + empty);
+      });
+    });
+    at(t += 10, mc -> server(mc, p -> showcase(p, false)));
     at(t += 40, mc -> startMeasure());
     at(t += 100, mc -> {
-      fpsVanilla = fps("128 vanilla chests as items and in frames");
+      fpsVanilla = fps("128 vanilla chests, barrels and spawners as items and in frames");
       server(mc, p -> showcase(p, true));
     });
     at(t += 40, mc -> startMeasure());
     at(t += 100, mc -> {
       double fps = fps("128 loaded trucks as items and in frames");
-      check("128 loaded trucks keep at least half the frame rate of 128 chests", fps > fpsVanilla / 2, fps + " vs " + fpsVanilla);
+      check("128 loaded trucks keep at least 70 % of the frame rate of the same 128 blocks", fps > fpsVanilla * 0.7, fps + " vs " + fpsVanilla);
       server(mc, StressScene::clearShowcase);
     });
     // a chest of 27 full shulker boxes
@@ -297,13 +356,14 @@ public final class StressScene {
     TransporterTier[] tiers = TransporterTier.values();
     Block[] loads = {Blocks.CHEST, Blocks.BARREL, Blocks.TRAPPED_CHEST, Blocks.SPAWNER};
     for (int i = 0; i < 64; i++) {
-      ItemStack stack = trucks ? loaded(tiers[i % tiers.length], loads[i % loads.length]) : new ItemStack(Items.CHEST);
+      // the same blocks as plain items for the baseline
+      ItemStack stack = trucks ? loaded(tiers[i % tiers.length], loads[i % loads.length]) : new ItemStack(loads[i % loads.length]);
       ItemEntity item = new ItemEntity(level, stage.getX() - 3.5 + (i % 16) * 1.0, stage.getY(), stage.getZ() + 2.5 + (i / 16) * 1.5, stack, 0, 0, 0);
       item.setNeverPickUp();
       item.setUnlimitedLifetime();
       level.addFreshEntity(item);
       ItemFrame frame = new ItemFrame(level, stage.offset(-8 + (i % 26) + i / 26 * 0, i / 26, 15), Direction.NORTH);
-      frame.setItem(trucks ? loaded(tiers[(i + 1) % tiers.length], loads[(i + 1) % loads.length]) : new ItemStack(Items.CHEST));
+      frame.setItem(trucks ? loaded(tiers[(i + 1) % tiers.length], loads[(i + 1) % loads.length]) : new ItemStack(loads[(i + 1) % loads.length]));
       level.addFreshEntity(frame);
     }
   }

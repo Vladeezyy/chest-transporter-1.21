@@ -120,15 +120,6 @@
           ],
           "texture": "#truck"
         },
-        "up": {
-          "uv": [
-            0,
-            0,
-            1,
-            8
-          ],
-          "texture": "#truck"
-        },
         "down": {
           "uv": [
             0,
@@ -188,15 +179,6 @@
           ],
           "texture": "#truck"
         },
-        "up": {
-          "uv": [
-            1,
-            0,
-            2,
-            8
-          ],
-          "texture": "#truck"
-        },
         "down": {
           "uv": [
             1,
@@ -230,24 +212,6 @@
           "texture": "#truck"
         },
         "south": {
-          "uv": [
-            0,
-            3,
-            8,
-            4
-          ],
-          "texture": "#truck"
-        },
-        "east": {
-          "uv": [
-            0,
-            3,
-            8,
-            4
-          ],
-          "texture": "#truck"
-        },
-        "west": {
           "uv": [
             0,
             3,
@@ -298,24 +262,6 @@
           "texture": "#truck"
         },
         "south": {
-          "uv": [
-            0,
-            5,
-            8,
-            6
-          ],
-          "texture": "#truck"
-        },
-        "east": {
-          "uv": [
-            0,
-            5,
-            8,
-            6
-          ],
-          "texture": "#truck"
-        },
-        "west": {
           "uv": [
             0,
             5,
@@ -434,24 +380,6 @@
           "texture": "#truck"
         },
         "south": {
-          "uv": [
-            8,
-            4,
-            16,
-            5
-          ],
-          "texture": "#truck"
-        },
-        "east": {
-          "uv": [
-            8,
-            4,
-            16,
-            5
-          ],
-          "texture": "#truck"
-        },
-        "west": {
           "uv": [
             8,
             4,

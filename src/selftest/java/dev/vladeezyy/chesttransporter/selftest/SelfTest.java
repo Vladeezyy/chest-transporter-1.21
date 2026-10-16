@@ -414,8 +414,10 @@ public final class SelfTest {
         && player.getAttribute(Attributes.BLOCK_BREAK_SPEED).hasModifier(CarryEffects.FATIGUE)
         && player.getFoodData().getExhaustionLevel() > 0.05f;
     });
-    check("effects end when the truck is gone", () -> {
+    check("effects end when the truck is gone (inventory scanned again within a second)", () -> {
       player.getInventory().clearContent();
+      // clearContent does not count as an inventory change: the periodic scan picks it up
+      player.tickCount = 20;
       NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.tick.PlayerTickEvent.Post(player));
       return !player.getAttribute(Attributes.MOVEMENT_SPEED).hasModifier(CarryEffects.SLOWNESS)
         && Math.abs(player.getAttributeValue(Attributes.JUMP_STRENGTH) - 0.42) < 1e-6;

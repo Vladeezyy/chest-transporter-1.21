@@ -44,6 +44,7 @@ public final class MinecartTransport {
           player.displayClientMessage(Transport.refusal("too_heavy"), true);
         } else {
           stack.set(ModRegistry.CARRIED, taken);
+          CarryEffects.invalidate(player);
           replace(cart, new Minecart(level, cart.getX(), cart.getY(), cart.getZ()));
         }
       }
@@ -55,6 +56,7 @@ public final class MinecartTransport {
         fill(chestCart, carried.data(), level.registryAccess());
         replace(cart, chestCart);
         stack.remove(ModRegistry.CARRIED);
+        CarryEffects.invalidate(player);
         stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(event.getHand()));
       }
       done(event, level);
