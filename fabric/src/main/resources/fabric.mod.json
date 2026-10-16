@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "description": "A hand truck that picks up chests, barrels and spawners with everything inside and puts them down somewhere else.",
+  "authors": ["Vladeezyy"],
+  "contributors": ["Idea: Chest Transporter by cubex2 (Minecraft 1.12.2); this mod is written from scratch"],
+  "contact": {
+    "sources": "https://github.com/Vladeezyy/chest-transporter-1.21",
+    "issues": "https://github.com/Vladeezyy/chest-transporter-1.21/issues"
+  },
+  "license": "${license}",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["dev.vladeezyy.chesttransporter.fabric.ChestTransporterFabric"],
+    "client": ["dev.vladeezyy.chesttransporter.fabric.ChestTransporterFabricClient"]
+  },
+  "depends": {
+    "fabricloader": ">=${fabric_loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}",
+    "java": ">=${java_version}"
+  }
+}

@@ -3,7 +3,7 @@ Terms follow the vanilla 1.21.1 translations (chest, barrel, spawner, materials)
 import json
 import pathlib
 
-LANG = pathlib.Path(__file__).resolve().parents[1] / 'src/main/resources/assets/chest_transporter/lang'
+LANG = pathlib.Path(__file__).resolve().parents[1] / 'common/src/main/resources/assets/chest_transporter/lang'
 TIERS = ['wooden', 'copper', 'iron', 'golden', 'diamond', 'netherite']
 
 NAMES = {

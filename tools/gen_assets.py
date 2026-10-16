@@ -9,7 +9,7 @@ import random
 
 from PIL import Image
 
-ROOT = pathlib.Path(__file__).resolve().parents[1] / 'src/main/resources/assets/chest_transporter'
+ROOT = pathlib.Path(__file__).resolve().parents[1] / 'common/src/main/resources/assets/chest_transporter'
 TIERS = {
     # base, light, dark
     'wooden': ((156, 122, 74), (190, 152, 97), (104, 80, 48)),

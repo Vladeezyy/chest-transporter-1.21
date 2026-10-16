@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "chest_transporter_selftest",
+  "version": "1.0.0",
+  "name": "Chest Transporter tests (dev only)",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["dev.vladeezyy.chesttransporter.fabric.selftest.FabricTestHooks"],
+    "client": ["dev.vladeezyy.chesttransporter.fabric.selftest.FabricTestHooksClient"]
+  },
+  "depends": {
+    "chest_transporter": "*"
+  }
+}

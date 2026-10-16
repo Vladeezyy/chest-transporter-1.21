@@ -1,0 +1,106 @@
+plugins {
+    id 'multiloader-loader'
+    id 'fabric-loom'
+}
+
+repositories {
+    maven {
+        name = 'Fabric'
+        url = 'https://maven.fabricmc.net'
+    }
+}
+
+// Tests: the shared checks (common/src/selftest) and the Fabric wiring (src/selftest), a second mod in dev runs only
+sourceSets {
+    selftest {
+        java.srcDir rootProject.file('common/src/selftest/java')
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.layered {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${parchment_minecraft}:${parchment_version}@zip")
+    }
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+}
+
+loom {
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+        chest_transporter_selftest {
+            sourceSet sourceSets.selftest
+        }
+    }
+    runs {
+        client {
+            client()
+            runDir('run')
+        }
+        server {
+            server()
+            runDir('run')
+        }
+        // tools/selftest.sh LOADER=fabric
+        selftest {
+            server()
+            name 'Self Test'
+            source sourceSets.selftest
+            vmArg '-Dchest_transporter.selftest=true'
+            runDir('run')
+        }
+        // tools/scenetest.sh LOADER=fabric
+        scene {
+            client()
+            name 'Scene'
+            source sourceSets.selftest
+            vmArg "-Dchest_transporter.scene=${project.findProperty('scene') ?: 'main'}"
+            vmArg "-Dchest_transporter.scene.lang=${project.findProperty('scene_lang') ?: 'en_us'}"
+            runDir('run')
+        }
+        // tools/nettest.sh LOADER=fabric
+        netServer {
+            server()
+            name 'Net Server'
+            source sourceSets.selftest
+            runDir('run-net')
+        }
+        netClient {
+            client()
+            name 'Net Client'
+            source sourceSets.selftest
+            vmArg '-Dchest_transporter.scene=net'
+            // the test server makes "Dev" an operator (NeoForge dev clients are "Dev" already)
+            programArgs '--quickPlayMultiplayer', 'localhost:25565', '--username', 'Dev'
+            runDir('run')
+        }
+    }
+}
+
+// The release jar on a production (intermediary-mapped) Fabric server with Fabric API: prodtest/serve-fabric.sh
+configurations {
+    productionMods { transitive = false }
+}
+dependencies {
+    productionMods "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+}
+def prodDir = file('run-prod')
+tasks.register('prodServer', net.fabricmc.loom.task.prod.ServerProductionRunTask) {
+    dependsOn remapJar
+    mods.from(remapJar.archiveFile)
+    mods.from(configurations.productionMods)
+    runDir = prodDir
+    timeout = java.time.Duration.ofMinutes(5)
+    doFirst {
+        new File(prodDir, 'world').deleteDir()
+        new File(prodDir, 'config').deleteDir()
+        prodDir.mkdirs()
+        new File(prodDir, 'eula.txt').text = 'eula=true\n'
+    }
+}

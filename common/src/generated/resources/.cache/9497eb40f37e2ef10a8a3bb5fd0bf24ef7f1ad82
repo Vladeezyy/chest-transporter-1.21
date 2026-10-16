@@ -1,0 +1,4 @@
+// 1.21.1	2026-10-16T19:40:38.319559	Tags for minecraft:block mod id chest_transporter
+35133e95f1c8fdd7a1c21afcc231fc0bffefb9a8 data/chest_transporter/tags/block/not_transportable.json
+6cab0a69ed48d561e5674abb7efbcb7d2e026533 data/chest_transporter/tags/block/spawners.json
+caf2d42467bfd93c5a35e15c1b66f91ae8eb178d data/chest_transporter/tags/block/transportable.json

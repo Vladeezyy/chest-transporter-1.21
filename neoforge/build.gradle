@@ -1,0 +1,117 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.neoforged.moddev'
+}
+
+// Tests (src/selftest here and the shared checks in common/src/selftest): dev runs only, never in the jar
+sourceSets {
+    selftest {
+        java.srcDir rootProject.file('common/src/selftest/java')
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+configurations {
+    selftestImplementation.extendsFrom implementation
+    selftestCompileOnly.extendsFrom compileOnly
+}
+
+neoForge {
+    // -Pneo_version=21.1.197 checks the oldest supported NeoForge
+    version = project.findProperty('neo_version')
+
+    parchment {
+        minecraftVersion = parchment_minecraft
+        mappingsVersion = parchment_version
+    }
+
+    runs {
+        configureEach {
+            gameDirectory = project.file('run')
+            logLevel = org.slf4j.event.Level.INFO
+        }
+        client {
+            client()
+        }
+        server {
+            server()
+            programArgument '--nogui'
+        }
+        // tools/scenetest.sh: client scene with screenshots and checks
+        scene {
+            client()
+            systemProperty 'chest_transporter.scene', project.findProperty('scene') ?: 'main'
+            systemProperty 'chest_transporter.scene.lang', project.findProperty('scene_lang') ?: 'en_us'
+        }
+        // tools/selftest.sh: functional checks on a fresh world, then stops
+        selftest {
+            server()
+            programArgument '--nogui'
+            systemProperty 'chest_transporter.selftest', 'true'
+        }
+        // tools/nettest.sh: a dev client joins a dev dedicated server
+        netServer {
+            server()
+            programArgument '--nogui'
+            gameDirectory = project.file('run-net')
+        }
+        netClient {
+            client()
+            systemProperty 'chest_transporter.scene', 'net'
+            programArguments.addAll('--quickPlayMultiplayer', 'localhost:25565')
+        }
+        // recipes and tags into common/src/generated/resources (both loaders use them)
+        data {
+            data()
+            programArguments.addAll '--mod', mod_id, '--all', '--output', rootProject.file('common/src/generated/resources').absolutePath,
+                    '--existing', rootProject.file('common/src/main/resources').absolutePath
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+            sourceSet(sourceSets.selftest)
+        }
+    }
+}
+neoForge.addModdingDependenciesTo(sourceSets.selftest)
+
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
+}
+
+repositories {
+    maven { url = 'https://api.modrinth.com/maven'; content { includeGroup 'maven.modrinth' } }
+}
+
+dependencies {
+    if (project.hasProperty('with_compat')) {
+        localRuntime "maven.modrinth:sodium:${compat_sodium}"
+        localRuntime "maven.modrinth:iris:${compat_iris}"
+        localRuntime "maven.modrinth:lithium:${compat_lithium}"
+        localRuntime "maven.modrinth:ferrite-core:${compat_ferritecore}"
+        localRuntime "maven.modrinth:modernfix:${compat_modernfix}"
+        localRuntime "maven.modrinth:jade:${compat_jade}"
+    }
+}
+
+// neoforge.mods.toml comes from src/main/templates with the gradle properties
+var generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version_range      : neo_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : license,
+            mod_version            : mod_version,
+            mod_authors            : 'Vladeezyy',
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from 'src/main/templates'
+    into 'build/generated/sources/modMetadata'
+}
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
