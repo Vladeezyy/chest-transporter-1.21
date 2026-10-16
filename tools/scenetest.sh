@@ -7,9 +7,9 @@ cd "$(dirname "$0")/.."
 rm -rf run/saves/ct_scene run/saves/ct_stress run/screenshots/scene_*.png build-scene.log
 rm -f run/config/chest_transporter-*.toml
 case "$*" in *scene=stress*)
-	# the stress scene starts from a broken common config
+	# the stress scene starts from a broken server config
 	mkdir -p run/config
-	printf '[modules]\n\tbuilding = "maybe"\n[building]\n\tshelf = 42\n\tbookshelf = "yes"\n' > run/config/chest_transporter-common.toml ;;
+	printf '[pickup]\n\tspawners = "maybe"\n\tspawnerTiers = 5\n\tmaxDataKiB = 999999\n[carrying]\n\tslowness = 1\n' > run/config/chest_transporter-server.toml ;;
 esac
 perl -e 'alarm 900; exec @ARGV' ./gradlew runScene --console=plain "$@" > build-scene.log 2>&1 &
 gradle_pid=$!
