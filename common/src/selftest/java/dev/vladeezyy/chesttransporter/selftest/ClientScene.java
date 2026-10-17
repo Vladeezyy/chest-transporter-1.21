@@ -55,7 +55,9 @@ public final class ClientScene {
   private static final String MODE = System.getProperty("chest_transporter.scene", "");
   /** {@code -Pscene=pose}: only the hand views, to tune the display transforms */
   private static final boolean POSE = MODE.equals("pose");
-  private static final boolean ENABLED = MODE.equals("main") || POSE;
+  /** {@code -Pscene=icon}: a loaded diamond truck drawn big on a plain background, for the project icon */
+  private static final boolean ICON = MODE.equals("icon");
+  private static final boolean ENABLED = MODE.equals("main") || POSE || ICON;
   static final String LANG = System.getProperty("chest_transporter.scene.lang", "en_us");
   private static final String WORLD = "ct_scene";
   private static final List<Pair<Integer, Consumer<Minecraft>>> STEPS = new ArrayList<>();
@@ -127,6 +129,8 @@ public final class ClientScene {
   static {
     if (POSE) {
       poseSteps();
+    } else if (ICON) {
+      iconSteps();
     } else {
       mainSteps();
     }
@@ -152,6 +156,44 @@ public final class ClientScene {
       mc.disconnect(new TitleScreen());
       mc.stop();
     });
+  }
+
+  private static void iconSteps() {
+    int t = 40;
+    at(t, mc -> mc.setScreen(new IconScreen(loaded(TransporterTier.DIAMOND, Blocks.CHEST, 1))));
+    at(t += 20, mc -> shot(mc, "icon"));
+    at(t += 5, mc -> {
+      mc.setScreen(null);
+      mc.level.disconnect();
+      mc.disconnect(new TitleScreen());
+      mc.stop();
+    });
+  }
+
+  /** One item drawn as large as the window allows, on the icon background colour */
+  static final class IconScreen extends net.minecraft.client.gui.screens.Screen {
+    private final ItemStack stack;
+
+    IconScreen(ItemStack stack) {
+      super(Component.empty());
+      this.stack = stack;
+    }
+
+    @Override
+    public void render(net.minecraft.client.gui.GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+      g.fill(0, 0, width, height, 0xFF1F1520);
+      float s = Math.min(width, height) / 16f * 0.85f;
+      g.pose().pushPose();
+      g.pose().translate(width / 2f - 8 * s, height / 2f - 8 * s, 0);
+      g.pose().scale(s, s, 1);
+      g.renderItem(stack, 0, 0);
+      g.pose().popPose();
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+      return false;
+    }
   }
 
   private static void mainSteps() {
