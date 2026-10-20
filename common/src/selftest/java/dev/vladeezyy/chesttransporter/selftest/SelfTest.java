@@ -97,7 +97,7 @@ public final class SelfTest {
   /** Right click on an entity as the network handler does it: the mod's handler first, then the vanilla interaction */
   private static void interact(net.minecraft.world.entity.Entity target) {
     if (dev.vladeezyy.chesttransporter.MinecartTransport.onUseEntity(player, player.level(), InteractionHand.MAIN_HAND, target) == InteractionResult.PASS) {
-      player.interactOn(target, InteractionHand.MAIN_HAND);
+      player.interactOn(target, InteractionHand.MAIN_HAND, target.getBoundingBox().getCenter());
     }
   }
 
@@ -262,7 +262,7 @@ public final class SelfTest {
     check("spawner with its mob: picked up by an iron truck and put down", () -> {
       BlockPos spawner = at(18, 0, 0);
       level.setBlockAndUpdate(spawner, Blocks.SPAWNER.defaultBlockState());
-      ((SpawnerBlockEntity) level.getBlockEntity(spawner)).setEntityId(EntityType.SKELETON, level.random);
+      ((SpawnerBlockEntity) level.getBlockEntity(spawner)).setEntityId(EntityType.SKELETON, level.getRandom());
       use(level, spawner, truck(TransporterTier.IRON), Direction.UP);
       boolean taken = level.getBlockState(spawner).isAir() && held().has(ModRegistry.carried());
       use(level, at(20, -1, 0), held(), Direction.UP);

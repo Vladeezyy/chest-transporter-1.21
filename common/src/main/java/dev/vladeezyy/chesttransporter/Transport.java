@@ -65,7 +65,7 @@ public final class Transport {
         stack.set(ModRegistry.carried(), result.carried());
         CarryEffects.invalidate(player);
       } else {
-        player.displayClientMessage(result.message(), true);
+        player.sendOverlayMessage(result.message());
       }
       return InteractionResult.CONSUME;
     }
@@ -74,7 +74,7 @@ public final class Transport {
     }
     Optional<Component> refusal = putDown(new UseOnContext(player, hand, hit), player, carried);
     if (refusal.isPresent()) {
-      player.displayClientMessage(refusal.get(), true);
+      player.sendOverlayMessage(refusal.get());
       return InteractionResult.FAIL;
     }
     stack.remove(ModRegistry.carried());

@@ -179,13 +179,13 @@ public final class ClientScene {
     }
 
     @Override
-    public void render(net.minecraft.client.gui.GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(net.minecraft.client.gui.GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
       g.fill(0, 0, width, height, 0xFF1F1520);
       float s = Math.min(width, height) / 16f * 0.85f;
       g.pose().pushMatrix();
       g.pose().translate(width / 2f - 8 * s, height / 2f - 8 * s);
       g.pose().scale(s, s);
-      g.renderItem(stack, 0, 0);
+      g.item(stack, 0, 0);
       g.pose().popMatrix();
     }
 
@@ -294,8 +294,8 @@ public final class ClientScene {
       mc.options.guiScale().set(3);
       mc.options.cloudStatus().set(CloudStatus.OFF);
       mc.options.pauseOnLostFocus = false;
-      mc.resizeDisplay();
-      LevelSettings settings = new LevelSettings(WORLD, GameType.CREATIVE, false, Difficulty.PEACEFUL, true, new GameRules(net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS), WorldDataConfiguration.DEFAULT);
+      mc.resizeGui();
+      LevelSettings settings = new LevelSettings(WORLD, GameType.CREATIVE, new LevelSettings.DifficultySettings(Difficulty.PEACEFUL, false, false), true, WorldDataConfiguration.DEFAULT);
       mc.createWorldOpenFlows().createFreshLevel(WORLD, settings, new WorldOptions(20261016L, false, false), WorldPresets::createNormalWorldDimensions, new TitleScreen());
       return;
     }
@@ -326,7 +326,7 @@ public final class ClientScene {
     ServerLevel level = player.level();
     BlockPos spawn = level.getRespawnData().pos();
     stage = new BlockPos(spawn.getX(), 140, spawn.getZ());
-    level.setDayTime(6000);
+    level.getServer().getCommands().performPrefixedCommand(level.getServer().createCommandSourceStack().withSuppressedOutput(), "time set noon");
     level.getGameRules().set(GameRules.ADVANCE_TIME, false, level.getServer());
     level.getGameRules().set(GameRules.ADVANCE_WEATHER, false, level.getServer());
     level.getGameRules().set(GameRules.SPAWN_MOBS, false, level.getServer());

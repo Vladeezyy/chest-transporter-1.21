@@ -43,7 +43,7 @@ public final class MinecartTransport {
       if (!level.isClientSide()) {
         CarriedBlock taken = takeChest(cart, level.registryAccess());
         if (taken.data().sizeInBytes() > TransporterConfig.server().maxDataBytes()) {
-          player.displayClientMessage(Transport.refusal("too_heavy"), true);
+          player.sendOverlayMessage(Transport.refusal("too_heavy"));
         } else {
           stack.set(ModRegistry.carried(), taken);
           CarryEffects.invalidate(player);

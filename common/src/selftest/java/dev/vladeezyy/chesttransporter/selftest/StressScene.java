@@ -271,8 +271,8 @@ public final class StressScene {
       mc.options.framerateLimit().set(260);
       mc.options.enableVsync().set(false);
       mc.options.pauseOnLostFocus = false;
-      mc.resizeDisplay();
-      LevelSettings settings = new LevelSettings(WORLD, GameType.SURVIVAL, false, Difficulty.PEACEFUL, true, new GameRules(net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS), WorldDataConfiguration.DEFAULT);
+      mc.resizeGui();
+      LevelSettings settings = new LevelSettings(WORLD, GameType.SURVIVAL, new LevelSettings.DifficultySettings(Difficulty.PEACEFUL, false, false), true, WorldDataConfiguration.DEFAULT);
       mc.createWorldOpenFlows().createFreshLevel(WORLD, settings, new WorldOptions(20261016L, false, false), WorldPresets::createNormalWorldDimensions, new TitleScreen());
       return;
     }
@@ -316,7 +316,7 @@ public final class StressScene {
     ServerLevel level = player.level();
     BlockPos spawn = level.getRespawnData().pos();
     stage = new BlockPos(spawn.getX(), 150, spawn.getZ());
-    level.setDayTime(6000);
+    level.getServer().getCommands().performPrefixedCommand(level.getServer().createCommandSourceStack().withSuppressedOutput(), "time set noon");
     level.getGameRules().set(GameRules.ADVANCE_TIME, false, level.getServer());
     level.getGameRules().set(GameRules.ADVANCE_WEATHER, false, level.getServer());
     for (BlockPos pos : BlockPos.betweenClosed(stage.offset(-10, -1, -4), stage.offset(20, 8, 20))) {
@@ -385,7 +385,7 @@ public final class StressScene {
     heavyCount = 0;
     if (player.level().getBlockEntity(stage.offset(0, 0, 2)) instanceof ChestBlockEntity chest) {
       for (int i = 0; i < 27; i++) {
-        for (ItemStack ignored : chest.getItem(i).getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyItems()) {
+        for (var ignored : chest.getItem(i).getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyItems()) {
           heavyCount++;
         }
       }

@@ -13,7 +13,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -33,13 +33,13 @@ public final class ChestTransporterFabric implements ModInitializer {
       }
     });
     ServerLifecycleEvents.SERVER_STARTING.register(server -> TransporterConfig.loadServer());
-    PayloadTypeRegistry.playS2C().register(ConfigSyncPayload.TYPE, ConfigSyncPayload.STREAM_CODEC.cast());
+    PayloadTypeRegistry.clientboundPlay().register(ConfigSyncPayload.TYPE, ConfigSyncPayload.STREAM_CODEC.cast());
     ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
       if (ServerPlayNetworking.canSend(handler.getPlayer(), ConfigSyncPayload.TYPE)) {
         ServerPlayNetworking.send(handler.getPlayer(), new ConfigSyncPayload(TransporterConfig.server()));
       }
     });
-    ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries -> {
+    CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries -> {
       for (TransporterTier tier : TransporterTier.values()) {
         entries.accept(ModRegistry.truck(tier));
       }

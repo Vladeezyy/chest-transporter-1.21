@@ -13,7 +13,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
@@ -38,7 +37,7 @@ public final class NeoForgeTestHooks {
   }
 
   @SubscribeEvent
-  static void protection(BlockEvent.BreakEvent event) {
+  static void protection(net.neoforged.neoforge.event.level.block.BreakBlockEvent event) {
     if (SelfTest.protect) {
       event.setCanceled(true);
     }

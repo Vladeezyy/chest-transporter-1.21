@@ -56,7 +56,7 @@ public final class NeoForgePlatform implements Platform {
 
   @Override
   public boolean mayBreak(Level level, BlockPos pos, BlockState state, Player player) {
-    return !NeoForge.EVENT_BUS.post(new BlockEvent.BreakEvent(level, pos, state, player)).isCanceled();
+    return !NeoForge.EVENT_BUS.post(new net.neoforged.neoforge.event.level.block.BreakBlockEvent(level, pos, state, player)).isCanceled();
   }
 
   @Override

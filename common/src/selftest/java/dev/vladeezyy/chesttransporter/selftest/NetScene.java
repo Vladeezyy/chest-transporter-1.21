@@ -52,6 +52,11 @@ public final class NetScene {
     mc.gameMode.useItemOn(mc.player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(pos).add(0, 0.5, 0), Direction.UP, pos, false));
   }
 
+  /** Right click on the entity as a player does (the hit at its centre) */
+  private static void interact(Minecraft mc, net.minecraft.world.entity.Entity target) {
+    mc.gameMode.interact(mc.player, target, new net.minecraft.world.phys.EntityHitResult(target, target.getBoundingBox().getCenter()), InteractionHand.MAIN_HAND);
+  }
+
   private static <T extends AbstractMinecart> T nearest(Minecraft mc, Class<T> type) {
     T found = null;
     for (Entity entity : mc.level.entitiesForRendering()) {
@@ -163,12 +168,12 @@ public final class NetScene {
       case 205 -> check("diamond truck took the spawner", mc.level.getBlockState(SPAWNER).isAir() && mc.player.getMainHandItem().has(ModRegistry.carried()), mc.level.getBlockState(SPAWNER));
       // minecart
       case 210 -> command(mc, "item replace entity @s weapon.mainhand with chest_transporter:copper_chest_transporter");
-      case 220 -> mc.gameMode.interact(mc.player, nearest(mc, MinecartChest.class), InteractionHand.MAIN_HAND);
+      case 220 -> interact(mc, nearest(mc, MinecartChest.class));
       case 235 -> {
         CarriedBlock carried = mc.player.getMainHandItem().get(ModRegistry.carried());
         check("chest of the minecart on the truck, a plain minecart left", carried != null && carried.state().is(Blocks.CHEST) && nearest(mc, Minecart.class) != null, carried);
       }
-      case 240 -> mc.gameMode.interact(mc.player, nearest(mc, Minecart.class), InteractionHand.MAIN_HAND);
+      case 240 -> interact(mc, nearest(mc, Minecart.class));
       case 255 -> check("chest back into the minecart", nearest(mc, MinecartChest.class) != null && !mc.player.getMainHandItem().has(ModRegistry.carried()), "no chest minecart");
       case 265 -> {
         ChestTransporter.LOG.info("[scene] DONE " + (checks - failures) + "/" + checks + (failures == 0 ? " passed" : " (" + failures + " failed)"));
