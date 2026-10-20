@@ -32,6 +32,7 @@ public final class NetScene {
   private static final int Y = 200;
   private static final BlockPos CHEST = new BlockPos(3, Y, 3), SPAWNER = new BlockPos(6, Y, 3), PLACED = new BlockPos(4, Y, 2);
   private static int tick, checks, failures;
+  private static boolean joining;
   private static boolean quitting;
 
   static void check(String name, boolean ok, Object detail) {
@@ -74,6 +75,14 @@ public final class NetScene {
       mc.options.onboardAccessibility = false;
       mc.options.save();
       mc.setScreen(new TitleScreen());
+      return;
+    }
+    // 26.x ignores --quickPlayMultiplayer in the dev run (the client waits on the title screen): join from code
+    if (!joining && mc.screen instanceof TitleScreen && mc.getOverlay() == null) {
+      joining = true;
+      net.minecraft.client.gui.screens.ConnectScreen.startConnecting(mc.screen, mc,
+        net.minecraft.client.multiplayer.resolver.ServerAddress.parseString("localhost:25565"),
+        new net.minecraft.client.multiplayer.ServerData("Test server", "localhost:25565", net.minecraft.client.multiplayer.ServerData.Type.OTHER), false, null);
       return;
     }
     // kicked or the server went away: fail and quit instead of waiting on the screen until the script's timeout

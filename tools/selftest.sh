@@ -7,7 +7,7 @@ LOADER=${LOADER:-neoforge}
 # processes of the dev runs: NeoForge passes the mod folders, Fabric's dev launcher the loom cache of the project
 case $LOADER in
 	neoforge) PROC='fml.modFolders=chest_transporter' ;;
-	fabric) PROC='chest-transporter-1.21/fabric/.gradle/loom-cache' ;;
+	fabric) PROC="$(basename "$PWD")/(fabric/)?\.gradle/loom-cache" ;;
 	*) echo "LOADER must be neoforge or fabric"; exit 2 ;;
 esac
 pkill -f "$PROC" 2>/dev/null
