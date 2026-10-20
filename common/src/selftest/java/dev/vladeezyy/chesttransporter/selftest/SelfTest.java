@@ -19,6 +19,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.vehicle.minecart.Minecart;
@@ -262,7 +263,7 @@ public final class SelfTest {
     check("spawner with its mob: picked up by an iron truck and put down", () -> {
       BlockPos spawner = at(18, 0, 0);
       level.setBlockAndUpdate(spawner, Blocks.SPAWNER.defaultBlockState());
-      ((SpawnerBlockEntity) level.getBlockEntity(spawner)).setEntityId(EntityType.SKELETON, level.getRandom());
+      ((SpawnerBlockEntity) level.getBlockEntity(spawner)).setEntityId(EntityTypes.SKELETON, level.getRandom());
       use(level, spawner, truck(TransporterTier.IRON), Direction.UP);
       boolean taken = level.getBlockState(spawner).isAir() && held().has(ModRegistry.carried());
       use(level, at(20, -1, 0), held(), Direction.UP);
@@ -380,7 +381,7 @@ public final class SelfTest {
     // minecarts
     check("chest minecart: the chest goes on the truck, a plain minecart stays", () -> {
       player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-      MinecartChest cart = new MinecartChest(EntityType.CHEST_MINECART, level);
+      MinecartChest cart = new MinecartChest(EntityTypes.CHEST_MINECART, level);
       cart.setPos(origin.getX() + 0.5, origin.getY(), origin.getZ() + 8.5);
       cart.setItem(3, new ItemStack(Items.EMERALD, 9));
       level.addFreshEntity(cart);

@@ -23,6 +23,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
@@ -89,7 +90,7 @@ public final class ClientScene {
   }
 
   static void shot(Minecraft mc, String name) {
-    Screenshot.grab(mc.gameDirectory, "scene_" + name + ".png", mc.getMainRenderTarget(), 1, c -> ChestTransporter.LOG.info("[scene] " + c.getString()));
+    Screenshot.grab(mc.gameDirectory, "scene_" + name + ".png", mc.gameRenderer.mainRenderTarget(), 1, c -> ChestTransporter.LOG.info("[scene] " + c.getString()));
   }
 
   static void lookAt(ServerPlayer player, double x, double y, double z, double tx, double ty, double tz) {
@@ -159,10 +160,10 @@ public final class ClientScene {
 
   private static void iconSteps() {
     int t = 40;
-    at(t, mc -> mc.setScreen(new IconScreen(loaded(TransporterTier.DIAMOND, Blocks.CHEST, 1))));
+    at(t, mc -> mc.gui.setScreen(new IconScreen(loaded(TransporterTier.DIAMOND, Blocks.CHEST, 1))));
     at(t += 20, mc -> shot(mc, "icon"));
     at(t += 5, mc -> {
-      mc.setScreen(null);
+      mc.gui.setScreen(null);
       mc.level.disconnect(Component.empty());
       mc.disconnect(new TitleScreen(), false);
       mc.stop();
@@ -217,13 +218,15 @@ public final class ClientScene {
     // survival: the inventory screen instead of the creative tabs
     at(t += 10, mc -> server(mc, p -> p.setGameMode(GameType.SURVIVAL)));
     at(t += 10, mc -> {
-      mc.options.hideGui = false;
-      mc.setScreen(new InventoryScreen(mc.player));
+      if (mc.gui.hud.isHidden()) {
+        mc.gui.hud.toggle();
+      }
+      mc.gui.setScreen(new InventoryScreen(mc.player));
     });
     at(t += 15, mc -> {
       shot(mc, "inventory");
       checkNoMissingTexture(mc, "inventory");
-      mc.setScreen(null);
+      mc.gui.setScreen(null);
       server(mc, p -> {
         p.setGameMode(GameType.CREATIVE);
         p.getAbilities().flying = true;
@@ -272,16 +275,16 @@ public final class ClientScene {
       return;
     }
     Minecraft mc = Minecraft.getInstance();
-    if (!opened && mc.screen instanceof net.minecraft.client.gui.screens.AccessibilityOnboardingScreen) {
+    if (!opened && mc.gui.screen() instanceof net.minecraft.client.gui.screens.AccessibilityOnboardingScreen) {
       mc.options.onboardAccessibility = false;
       mc.options.save();
-      mc.setScreen(new TitleScreen());
+      mc.gui.setScreen(new TitleScreen());
       return;
     }
-    if (!opened && mc.getOverlay() != null) {
+    if (!opened && mc.gui.overlay() != null) {
       return;
     }
-    if (!opened && mc.screen instanceof TitleScreen) {
+    if (!opened && mc.gui.screen() instanceof TitleScreen) {
       if (!mc.options.languageCode.equals(LANG)) {
         mc.options.languageCode = LANG;
         mc.getLanguageManager().setSelected(LANG);
@@ -304,9 +307,9 @@ public final class ClientScene {
     }
     mc.options.pauseOnLostFocus = false;
     mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
-    mc.getToastManager().clear();
-    if (mc.screen instanceof PauseScreen) {
-      mc.setScreen(null);
+    mc.gui.toastManager().clear();
+    if (mc.gui.screen() instanceof PauseScreen) {
+      mc.gui.setScreen(null);
     }
     tick++;
     for (Pair<Integer, Consumer<Minecraft>> step : STEPS) {
@@ -373,7 +376,7 @@ public final class ClientScene {
     List<Component> lines = loaded(TransporterTier.IRON, Blocks.SPAWNER, 0).getTooltipLines(net.minecraft.world.item.Item.TooltipContext.of(mc.level), mc.player, TooltipFlag.NORMAL);
     String text = String.join(" | ", lines.stream().map(Component::getString).toList());
     String spawner = Blocks.SPAWNER.getName().getString();
-    String zombie = EntityType.ZOMBIE.getDescription().getString();
+    String zombie = EntityTypes.ZOMBIE.getDescription().getString();
     check("tooltip of a loaded truck names the block and the mob", text.contains(spawner) && text.contains(zombie), text);
     List<Component> chest = loaded(TransporterTier.IRON, Blocks.CHEST, 5).getTooltipLines(net.minecraft.world.item.Item.TooltipContext.of(mc.level), mc.player, TooltipFlag.NORMAL);
     check("tooltip counts the stacks inside", chest.stream().anyMatch(line -> line.getString().contains("5")), chest);
@@ -411,7 +414,7 @@ public final class ClientScene {
 
   /** The missing texture is magenta and black: count magenta pixels of the frame (read after the frame is drawn) */
   private static void checkNoMissingTexture(Minecraft mc, String name) {
-    Screenshot.takeScreenshot(mc.getMainRenderTarget(), image -> {
+    Screenshot.takeScreenshot(mc.gameRenderer.mainRenderTarget(), image -> {
       int magenta = 0;
       try (image) {
         for (int pixel : image.getPixels()) {

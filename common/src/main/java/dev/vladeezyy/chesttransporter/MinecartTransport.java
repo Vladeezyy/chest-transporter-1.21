@@ -15,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.minecart.Minecart;
 import net.minecraft.world.entity.vehicle.minecart.MinecartChest;
@@ -47,14 +48,14 @@ public final class MinecartTransport {
         } else {
           stack.set(ModRegistry.carried(), taken);
           CarryEffects.invalidate(player);
-          replace(cart, new Minecart(EntityType.MINECART, level));
+          replace(cart, new Minecart(EntityTypes.MINECART, level));
         }
       }
       return InteractionResult.SUCCESS;
     } else if (carried != null && carried.state().is(Blocks.CHEST) && target instanceof Minecart cart
-               && cart.getType() == EntityType.MINECART && !cart.isVehicle() && cart.isAlive()) {
+               && cart.getType() == EntityTypes.MINECART && !cart.isVehicle() && cart.isAlive()) {
       if (!level.isClientSide()) {
-        MinecartChest chestCart = new MinecartChest(EntityType.CHEST_MINECART, level);
+        MinecartChest chestCart = new MinecartChest(EntityTypes.CHEST_MINECART, level);
         fill(chestCart, carried.data(), level.registryAccess());
         replace(cart, chestCart);
         stack.remove(ModRegistry.carried());

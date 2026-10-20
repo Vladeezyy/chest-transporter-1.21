@@ -254,16 +254,16 @@ public final class StressScene {
       return;
     }
     Minecraft mc = Minecraft.getInstance();
-    if (!opened && mc.screen instanceof net.minecraft.client.gui.screens.AccessibilityOnboardingScreen) {
+    if (!opened && mc.gui.screen() instanceof net.minecraft.client.gui.screens.AccessibilityOnboardingScreen) {
       mc.options.onboardAccessibility = false;
       mc.options.save();
-      mc.setScreen(new TitleScreen());
+      mc.gui.setScreen(new TitleScreen());
       return;
     }
-    if (mc.getOverlay() != null) {
+    if (mc.gui.overlay() != null) {
       return;
     }
-    if (!opened && mc.screen instanceof TitleScreen) {
+    if (!opened && mc.gui.screen() instanceof TitleScreen) {
       opened = true;
       GLFW.glfwSetWindowSize(mc.getWindow().handle(), 1600, 900);
       mc.options.guiScale().set(3);
@@ -276,7 +276,7 @@ public final class StressScene {
       mc.createWorldOpenFlows().createFreshLevel(WORLD, settings, new WorldOptions(20261016L, false, false), WorldPresets::createNormalWorldDimensions, new TitleScreen());
       return;
     }
-    if (rejoining && !rejoined && mc.level == null && mc.screen instanceof TitleScreen) {
+    if (rejoining && !rejoined && mc.level == null && mc.gui.screen() instanceof TitleScreen) {
       rejoined = true;
       tick = 0;
       mc.createWorldOpenFlows().openWorld(WORLD, () -> check("world opens again", false, "failed"));
@@ -287,9 +287,9 @@ public final class StressScene {
     }
     mc.options.pauseOnLostFocus = false;
     mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
-    mc.getToastManager().clear();
-    if (mc.screen instanceof PauseScreen) {
-      mc.setScreen(null);
+    mc.gui.toastManager().clear();
+    if (mc.gui.screen() instanceof PauseScreen) {
+      mc.gui.setScreen(null);
     }
     tick++;
     for (Pair<Integer, Consumer<Minecraft>> step : rejoined ? REJOIN_STEPS : STEPS) {
