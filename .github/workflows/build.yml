@@ -44,14 +44,14 @@ jobs:
       - name: Self-test (NeoForge)
         if: ${{ hashFiles('tools/selftest.sh') != '' && hashFiles('neoforge/build.gradle') != '' }}
         run: |
-          s=0; tools/selftest.sh || s=$?
+          s=0; sh tools/selftest.sh || s=$?
           mv build-selftest.log selftest-neoforge.log
           exit $s
 
       - name: Self-test (Fabric)
         if: ${{ !cancelled() && hashFiles('tools/selftest.sh') != '' && hashFiles('fabric/build.gradle') != '' }}
         run: |
-          s=0; LOADER=fabric tools/selftest.sh || s=$?
+          s=0; LOADER=fabric sh tools/selftest.sh || s=$?
           mv build-selftest.log selftest-fabric.log
           exit $s
 
