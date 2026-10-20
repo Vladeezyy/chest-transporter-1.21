@@ -40,7 +40,6 @@ import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -265,7 +264,7 @@ public final class StressScene {
     }
     if (!opened && mc.gui.screen() instanceof TitleScreen) {
       opened = true;
-      GLFW.glfwSetWindowSize(mc.getWindow().handle(), 1600, 900);
+      mc.getWindow().setWindowed(1600, 900);
       mc.options.guiScale().set(3);
       mc.options.cloudStatus().set(CloudStatus.OFF);
       mc.options.framerateLimit().set(260);

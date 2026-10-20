@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "chest_transporter:wooden_chest_transporter"
+        "recipes": "chest_transporter:wooden_chest_transporter"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

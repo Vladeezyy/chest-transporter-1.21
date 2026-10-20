@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "chest_transporter:netherite_chest_transporter_smithing"
+        "recipes": "chest_transporter:netherite_chest_transporter_smithing"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
