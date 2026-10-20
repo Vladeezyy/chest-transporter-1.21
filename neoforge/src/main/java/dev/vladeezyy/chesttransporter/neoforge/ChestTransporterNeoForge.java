@@ -29,13 +29,12 @@ public final class ChestTransporterNeoForge {
     NeoForgePlatform.registerAll(modBus);
     modBus.addListener(ChestTransporterNeoForge::creativeTab);
     modBus.addListener(ChestTransporterNeoForge::payloads);
-    modBus.addListener(DataGen::gather);
     NeoForge.EVENT_BUS.addListener(ChestTransporterNeoForge::useBlock);
     NeoForge.EVENT_BUS.addListener(ChestTransporterNeoForge::useEntity);
     NeoForge.EVENT_BUS.addListener((PlayerTickEvent.Post event) -> CarryEffects.tick(event.getEntity()));
     NeoForge.EVENT_BUS.addListener((ServerAboutToStartEvent event) -> TransporterConfig.loadServer());
     NeoForge.EVENT_BUS.addListener(ChestTransporterNeoForge::loggedIn);
-    if (FMLEnvironment.dist.isClient()) {
+    if (FMLEnvironment.getDist().isClient()) {
       NeoForgeClient.init(modBus);
     }
   }

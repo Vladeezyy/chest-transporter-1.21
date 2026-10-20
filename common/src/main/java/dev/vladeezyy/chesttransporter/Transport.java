@@ -3,12 +3,14 @@ package dev.vladeezyy.chesttransporter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
+import net.minecraft.world.LockCode;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
@@ -23,7 +25,6 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 import dev.vladeezyy.chesttransporter.platform.Platform;
@@ -56,7 +57,7 @@ public final class Transport {
       if (!looksTransportable(level.getBlockState(hit.getBlockPos()))) {
         return InteractionResult.PASS;
       }
-      if (level.isClientSide) {
+      if (level.isClientSide()) {
         return InteractionResult.SUCCESS;
       }
       Result result = pickUp(level, hit.getBlockPos(), player, truck.tier());
@@ -68,7 +69,7 @@ public final class Transport {
       }
       return InteractionResult.CONSUME;
     }
-    if (level.isClientSide) {
+    if (level.isClientSide()) {
       return InteractionResult.SUCCESS;
     }
     Optional<Component> refusal = putDown(new UseOnContext(player, hand, hit), player, carried);
@@ -78,7 +79,7 @@ public final class Transport {
     }
     stack.remove(ModRegistry.carried());
     CarryEffects.invalidate(player);
-    stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(hand));
+    stack.hurtAndBreak(1, player, hand);
     return InteractionResult.CONSUME;
   }
 
@@ -128,9 +129,9 @@ public final class Transport {
     return new Result(new CarriedBlock(carriedState, data), Component.empty());
   }
 
-  /** The lock of a container (vanilla `Lock`, set with commands) */
+  /** The lock of a container (vanilla `lock`, an item predicate set with commands) */
   private static boolean isLocked(CompoundTag data) {
-    return data.contains("Lock", Tag.TAG_STRING) && !data.getString("Lock").isEmpty();
+    return data.contains(LockCode.TAG_LOCK);
   }
 
   /** Players who still had the removed container open lose the screen now, not on their next tick */
@@ -169,7 +170,7 @@ public final class Transport {
     }
     BlockEntity blockEntity = level.getBlockEntity(pos);
     if (blockEntity != null) {
-      blockEntity.loadWithComponents(carried.data(), level.registryAccess());
+      blockEntity.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), carried.data()));
       blockEntity.setChanged();
     }
     BlockState placed = level.getBlockState(pos);

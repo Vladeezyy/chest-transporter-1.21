@@ -32,7 +32,7 @@ public final class FabricPlatform implements Platform {
   @Override
   @SuppressWarnings("unchecked")
   public <R, T extends R> Supplier<T> register(ResourceKey<? extends Registry<R>> registry, String name, Supplier<T> factory) {
-    Registry<R> target = (Registry<R>) BuiltInRegistries.REGISTRY.get(registry.location());
+    Registry<R> target = (Registry<R>) BuiltInRegistries.REGISTRY.getValue(registry.identifier());
     T value = Registry.register(target, ChestTransporter.id(name), factory.get());
     return () -> value;
   }

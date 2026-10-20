@@ -12,9 +12,9 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.entity.vehicle.Minecart;
-import net.minecraft.world.entity.vehicle.MinecartChest;
+import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.minecart.Minecart;
+import net.minecraft.world.entity.vehicle.minecart.MinecartChest;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -97,7 +97,7 @@ public final class NetScene {
       return;
     }
     mc.options.pauseOnLostFocus = false;
-    mc.getToasts().clear();
+    mc.getToastManager().clear();
     tick++;
     try {
       step(mc);
@@ -132,7 +132,7 @@ public final class NetScene {
       case 95 -> {
         CarriedBlock carried = mc.player.getMainHandItem().get(ModRegistry.carried());
         check("chest picked up: gone from the world, on the truck with its 2 stacks", mc.level.getBlockState(CHEST).isAir() && carried != null
-          && carried.data().getList("Items", Tag.TAG_COMPOUND).size() == 2, mc.level.getBlockState(CHEST) + " " + carried);
+          && carried.data().getListOrEmpty("Items").size() == 2, mc.level.getBlockState(CHEST) + " " + carried);
         check("the client slows down the loaded player", mc.player.getAttribute(Attributes.MOVEMENT_SPEED).hasModifier(CarryEffects.SLOWNESS), "no modifier");
       }
       case 100 -> useTop(mc, PLACED.below());
@@ -172,8 +172,8 @@ public final class NetScene {
       case 255 -> check("chest back into the minecart", nearest(mc, MinecartChest.class) != null && !mc.player.getMainHandItem().has(ModRegistry.carried()), "no chest minecart");
       case 265 -> {
         ChestTransporter.LOG.info("[scene] DONE " + (checks - failures) + "/" + checks + (failures == 0 ? " passed" : " (" + failures + " failed)"));
-        mc.level.disconnect();
-        mc.disconnect(new TitleScreen());
+        mc.level.disconnect(net.minecraft.network.chat.Component.empty());
+        mc.disconnect(new TitleScreen(), false);
         mc.stop();
       }
       default -> { }

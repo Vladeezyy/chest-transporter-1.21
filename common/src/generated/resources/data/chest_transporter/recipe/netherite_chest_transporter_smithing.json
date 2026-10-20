@@ -1,16 +1,10 @@
 {
   "type": "minecraft:smithing_transform",
-  "addition": {
-    "item": "minecraft:netherite_ingot"
-  },
-  "base": {
-    "item": "chest_transporter:diamond_chest_transporter"
-  },
+  "addition": "minecraft:netherite_ingot",
+  "base": "chest_transporter:diamond_chest_transporter",
   "result": {
     "count": 1,
     "id": "chest_transporter:netherite_chest_transporter"
   },
-  "template": {
-    "item": "minecraft:netherite_upgrade_smithing_template"
-  }
+  "template": "minecraft:netherite_upgrade_smithing_template"
 }

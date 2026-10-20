@@ -20,11 +20,6 @@ neoForge {
     // -Pneo_version=21.1.197 checks the oldest supported NeoForge
     version = project.findProperty('neo_version')
 
-    parchment {
-        minecraftVersion = parchment_minecraft
-        mappingsVersion = parchment_version
-    }
-
     runs {
         configureEach {
             gameDirectory = project.file('run')
@@ -59,12 +54,6 @@ neoForge {
             client()
             systemProperty 'chest_transporter.scene', 'net'
             programArguments.addAll('--quickPlayMultiplayer', 'localhost:25565')
-        }
-        // recipes and tags into common/src/generated/resources (both loaders use them)
-        data {
-            data()
-            programArguments.addAll '--mod', mod_id, '--all', '--output', rootProject.file('common/src/generated/resources').absolutePath,
-                    '--existing', rootProject.file('common/src/main/resources').absolutePath
         }
     }
 

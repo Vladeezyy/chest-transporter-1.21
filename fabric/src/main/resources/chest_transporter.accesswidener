@@ -1,0 +1,3 @@
+accessWidener v2 named
+# the load renderer of the truck (no Fabric API registry for special item model renderers)
+accessible field net/minecraft/client/renderer/special/SpecialModelRenderers ID_MAPPER Lnet/minecraft/util/ExtraCodecs$LateBoundIdMapper;

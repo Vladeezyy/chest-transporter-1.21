@@ -1,5 +1,5 @@
 {
-  "parent": "minecraft:builtin/entity",
+  "parent": "chest_transporter:item/wooden_chest_transporter_frame",
   "gui_light": "side",
   "textures": {
     "particle": "chest_transporter:item/wooden_chest_transporter"

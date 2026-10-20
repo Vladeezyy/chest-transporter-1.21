@@ -21,8 +21,11 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.vehicle.Minecart;
-import net.minecraft.world.entity.vehicle.MinecartChest;
+import net.minecraft.world.entity.vehicle.minecart.Minecart;
+import net.minecraft.world.entity.vehicle.minecart.MinecartChest;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -112,7 +115,7 @@ public final class SelfTest {
       return;
     }
     ServerLevel level = server.overworld();
-    BlockPos spawn = level.getSharedSpawnPos();
+    BlockPos spawn = level.getRespawnData().pos();
     // away from spawn protection, the fake player is not an operator
     origin = new BlockPos(spawn.getX() + 200, 150, spawn.getZ());
     for (int cx = -1; cx <= 2; cx++) {
@@ -165,14 +168,13 @@ public final class SelfTest {
       }
       return BuiltInRegistries.ITEM.keySet().stream().filter(id -> id.getNamespace().equals(ChestTransporter.MOD_ID)).count() == 6;
     });
-    check("netherite truck survives fire and lava", () -> truck(TransporterTier.NETHERITE).has(net.minecraft.core.component.DataComponents.FIRE_RESISTANT)
-      && !truck(TransporterTier.IRON).has(net.minecraft.core.component.DataComponents.FIRE_RESISTANT));
+    check("netherite truck survives fire and lava", () -> truck(TransporterTier.NETHERITE).has(net.minecraft.core.component.DataComponents.DAMAGE_RESISTANT)
+      && !truck(TransporterTier.IRON).has(net.minecraft.core.component.DataComponents.DAMAGE_RESISTANT));
     check("five crafting recipes and one smithing recipe", () ->
-      server.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream().filter(r -> r.id().getNamespace().equals(ChestTransporter.MOD_ID)).count() == 5
-        && server.getRecipeManager().getAllRecipesFor(RecipeType.SMITHING).stream().filter(r -> r.id().getNamespace().equals(ChestTransporter.MOD_ID)).count() == 1);
-    check("trucks repair with their material", () -> truck(TransporterTier.IRON).getItem().isValidRepairItem(truck(TransporterTier.IRON), new ItemStack(Items.IRON_INGOT))
-      && truck(TransporterTier.WOODEN).getItem().isValidRepairItem(truck(TransporterTier.WOODEN), new ItemStack(Items.OAK_PLANKS))
-      && !truck(TransporterTier.IRON).getItem().isValidRepairItem(truck(TransporterTier.IRON), new ItemStack(Items.DIAMOND)));
+      modRecipes(server, RecipeType.CRAFTING) == 5 && modRecipes(server, RecipeType.SMITHING) == 1);
+    check("trucks repair with their material", () -> truck(TransporterTier.IRON).isValidRepairItem(new ItemStack(Items.IRON_INGOT))
+      && truck(TransporterTier.WOODEN).isValidRepairItem(new ItemStack(Items.OAK_PLANKS))
+      && !truck(TransporterTier.IRON).isValidRepairItem(new ItemStack(Items.DIAMOND)));
 
     // single chest with items and a name
     BlockPos chest = at(0, 0, 0);
@@ -182,12 +184,13 @@ public final class SelfTest {
       be.setItem(0, new ItemStack(Items.DIAMOND, 12));
       be.setItem(26, new ItemStack(Items.OAK_LOG, 64));
       CompoundTag nameData = new CompoundTag();
-      nameData.putString("CustomName", Component.Serializer.toJson(Component.literal("Loot"), level.registryAccess()));
-      be.loadWithComponents(mergedWith(be.saveWithoutMetadata(level.registryAccess()), nameData), level.registryAccess());
+      nameData.put("CustomName", net.minecraft.network.chat.ComponentSerialization.CODEC.encodeStart(
+        level.registryAccess().createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE), Component.literal("Loot")).getOrThrow());
+      be.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), mergedWith(be.saveWithoutMetadata(level.registryAccess()), nameData)));
       InteractionResult result = use(level, chest, truck(TransporterTier.IRON), Direction.UP);
       CarriedBlock carried = held().get(ModRegistry.carried());
       return result.consumesAction() && level.getBlockState(chest).isAir() && carried != null && carried.state().is(Blocks.CHEST)
-        && carried.data().getList("Items", Tag.TAG_COMPOUND).size() == 2 && itemEntities(level, chest) == 0;
+        && carried.data().getListOrEmpty("Items").size() == 2 && itemEntities(level, chest) == 0;
     });
     check("chest put down on top of a block: items and name back, one move used", () -> {
       BlockPos ground = at(3, -1, 0);
@@ -217,7 +220,7 @@ public final class SelfTest {
       return carried != null && carried.state().getValue(ChestBlock.TYPE) == ChestType.SINGLE
         && level.getBlockState(right).getValue(ChestBlock.TYPE) == ChestType.SINGLE
         && ((ChestBlockEntity) level.getBlockEntity(right)).getItem(0).is(Items.BREAD)
-        && ItemStack.parseOptional(level.registryAccess(), carried.data().getList("Items", Tag.TAG_COMPOUND).getCompound(0)).is(Items.APPLE);
+        && firstItem(level, carried).is(Items.APPLE);
     });
     check("chest put down next to a single chest joins it into a double chest", () -> {
       player.setYRot(0); // facing south: the chest faces north like its neighbour
@@ -250,7 +253,7 @@ public final class SelfTest {
       ((ChestBlockEntity) level.getBlockEntity(loot)).setLootTable(BuiltInLootTables.SIMPLE_DUNGEON, 42L);
       use(level, loot, truck(TransporterTier.IRON), Direction.UP);
       CarriedBlock carried = held().get(ModRegistry.carried());
-      boolean kept = carried != null && carried.data().getString("LootTable").equals(BuiltInLootTables.SIMPLE_DUNGEON.location().toString());
+      boolean kept = carried != null && carried.data().getStringOr("LootTable", "").equals(BuiltInLootTables.SIMPLE_DUNGEON.identifier().toString());
       use(level, at(16, -1, 0), held(), Direction.UP);
       return kept && level.getBlockEntity(at(16, 0, 0)) instanceof ChestBlockEntity be && BuiltInLootTables.SIMPLE_DUNGEON.equals(be.getLootTable());
     });
@@ -264,7 +267,7 @@ public final class SelfTest {
       boolean taken = level.getBlockState(spawner).isAir() && held().has(ModRegistry.carried());
       use(level, at(20, -1, 0), held(), Direction.UP);
       CompoundTag data = level.getBlockEntity(at(20, 0, 0)).saveWithoutMetadata(level.registryAccess());
-      return taken && data.getCompound("SpawnData").getCompound("entity").getString("id").equals("minecraft:skeleton");
+      return taken && data.getCompoundOrEmpty("SpawnData").getCompoundOrEmpty("entity").getStringOr("id", "").equals("minecraft:skeleton");
     });
     check("spawner refused when the config turns spawners off", () -> {
       BlockPos spawner = at(20, 0, 0);
@@ -289,9 +292,12 @@ public final class SelfTest {
       BlockPos locked = at(22, 0, 0);
       level.setBlockAndUpdate(locked, Blocks.CHEST.defaultBlockState());
       ChestBlockEntity be = (ChestBlockEntity) level.getBlockEntity(locked);
+      // a lock is an item predicate since 1.21.2: here "any stack of one item"
+      CompoundTag predicate = new CompoundTag();
+      predicate.putInt("count", 1);
       CompoundTag lock = new CompoundTag();
-      lock.putString("Lock", "secret");
-      be.loadWithComponents(mergedWith(be.saveWithoutMetadata(level.registryAccess()), lock), level.registryAccess());
+      lock.put(net.minecraft.world.LockCode.TAG_LOCK, predicate);
+      be.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), mergedWith(be.saveWithoutMetadata(level.registryAccess()), lock)));
       use(level, locked, truck(TransporterTier.IRON), Direction.UP);
       return level.getBlockState(locked).is(Blocks.CHEST) && !held().has(ModRegistry.carried());
     });
@@ -361,8 +367,9 @@ public final class SelfTest {
       CompoundTag data = new CompoundTag();
       data.putString("LootTable", "minecraft:chests/simple_dungeon");
       truck.set(ModRegistry.carried(), new CarriedBlock(Blocks.TRAPPED_CHEST.defaultBlockState(), data));
-      Tag saved = truck.save(level.registryAccess());
-      ItemStack loaded = ItemStack.parseOptional(level.registryAccess(), (CompoundTag) saved);
+      var ops = level.registryAccess().createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE);
+      Tag saved = ItemStack.CODEC.encodeStart(ops, truck).getOrThrow();
+      ItemStack loaded = ItemStack.CODEC.parse(ops, saved).getOrThrow();
       return ItemStack.isSameItemSameComponents(truck, loaded) && loaded.get(ModRegistry.carried()).state().is(Blocks.TRAPPED_CHEST);
     });
 
@@ -373,7 +380,8 @@ public final class SelfTest {
     // minecarts
     check("chest minecart: the chest goes on the truck, a plain minecart stays", () -> {
       player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-      MinecartChest cart = new MinecartChest(level, origin.getX() + 0.5, origin.getY(), origin.getZ() + 8.5);
+      MinecartChest cart = new MinecartChest(EntityType.CHEST_MINECART, level);
+      cart.setPos(origin.getX() + 0.5, origin.getY(), origin.getZ() + 8.5);
       cart.setItem(3, new ItemStack(Items.EMERALD, 9));
       level.addFreshEntity(cart);
       ItemStack truck = truck(TransporterTier.IRON);
@@ -382,7 +390,7 @@ public final class SelfTest {
       CarriedBlock carried = held().get(ModRegistry.carried());
       List<Minecart> plain = level.getEntitiesOfClass(Minecart.class, new AABB(origin.offset(0, 0, 8)).inflate(2));
       return !cart.isAlive() && carried != null && carried.state().is(Blocks.CHEST) && plain.size() == 1 && itemEntities(level, origin.offset(0, 0, 8)) == 0
-        && ItemStack.parseOptional(level.registryAccess(), carried.data().getList("Items", Tag.TAG_COMPOUND).getCompound(0)).getCount() == 9;
+        && firstItem(level, carried).getCount() == 9;
     });
     check("carried chest goes into a plain minecart", () -> {
       Minecart plain = level.getEntitiesOfClass(Minecart.class, new AABB(origin.offset(0, 0, 8)).inflate(2)).get(0);
@@ -396,7 +404,7 @@ public final class SelfTest {
     ItemStack loaded = truck(TransporterTier.IRON);
     loaded.set(ModRegistry.carried(), new CarriedBlock(Blocks.CHEST.defaultBlockState(), new CompoundTag()));
     player.getInventory().setItem(20, loaded);
-    player.getFoodData().setExhaustion(0);
+    setExhaustion(0);
     check("loaded truck in the inventory: slower, weaker jump, slower mining, hungrier", () -> {
       for (int i = 0; i < 20; i++) {
         CarryEffects.tick(player);
@@ -404,7 +412,7 @@ public final class SelfTest {
       return player.getAttribute(Attributes.MOVEMENT_SPEED).hasModifier(CarryEffects.SLOWNESS)
         && Math.abs(player.getAttributeValue(Attributes.JUMP_STRENGTH) - 0.34) < 1e-6
         && player.getAttribute(Attributes.BLOCK_BREAK_SPEED).hasModifier(CarryEffects.FATIGUE)
-        && player.getFoodData().getExhaustionLevel() > 0.05f;
+        && exhaustion() > 0.05f;
     });
     check("effects end when the truck is gone (inventory scanned again within a second)", () -> {
       player.getInventory().clearContent();
@@ -414,6 +422,32 @@ public final class SelfTest {
       return !player.getAttribute(Attributes.MOVEMENT_SPEED).hasModifier(CarryEffects.SLOWNESS)
         && Math.abs(player.getAttributeValue(Attributes.JUMP_STRENGTH) - 0.42) < 1e-6;
     });
+  }
+
+  private static long modRecipes(MinecraftServer server, RecipeType<?> type) {
+    return server.getRecipeManager().getRecipes().stream()
+      .filter(r -> r.value().getType() == type && r.id().identifier().getNamespace().equals(ChestTransporter.MOD_ID)).count();
+  }
+
+  /** The first stack of the carried container */
+  private static ItemStack firstItem(ServerLevel level, CarriedBlock carried) {
+    var ops = level.registryAccess().createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE);
+    return ItemStack.CODEC.parse(ops, carried.data().getListOrEmpty("Items").getCompoundOrEmpty(0)).result().orElse(ItemStack.EMPTY);
+  }
+
+  /** The food exhaustion of the fake player (no getter since 1.21.5: read from its saved food data) */
+  private static float exhaustion() {
+    TagValueOutput out = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING);
+    player.getFoodData().addAdditionalSaveData(out);
+    return out.buildResult().getFloatOr("foodExhaustionLevel", 0);
+  }
+
+  private static void setExhaustion(float value) {
+    TagValueOutput out = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING);
+    player.getFoodData().addAdditionalSaveData(out);
+    CompoundTag food = out.buildResult();
+    food.putFloat("foodExhaustionLevel", value);
+    player.getFoodData().readAdditionalSaveData(TagValueInput.create(ProblemReporter.DISCARDING, player.level().registryAccess(), food));
   }
 
   private static CompoundTag mergedWith(CompoundTag base, CompoundTag extra) {

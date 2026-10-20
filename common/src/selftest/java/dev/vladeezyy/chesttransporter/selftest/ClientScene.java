@@ -13,7 +13,6 @@ import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.locale.Language;
@@ -30,7 +29,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
@@ -90,14 +89,14 @@ public final class ClientScene {
   }
 
   static void shot(Minecraft mc, String name) {
-    Screenshot.grab(mc.gameDirectory, "scene_" + name + ".png", mc.getMainRenderTarget(), c -> ChestTransporter.LOG.info("[scene] " + c.getString()));
+    Screenshot.grab(mc.gameDirectory, "scene_" + name + ".png", mc.getMainRenderTarget(), 1, c -> ChestTransporter.LOG.info("[scene] " + c.getString()));
   }
 
   static void lookAt(ServerPlayer player, double x, double y, double z, double tx, double ty, double tz) {
     double dx = tx - x, dy = ty - (y + player.getEyeHeight()), dz = tz - z;
     float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
     float pitch = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
-    player.teleportTo(player.serverLevel(), stage.getX() + x, stage.getY() + y, stage.getZ() + z, yaw, pitch);
+    player.teleportTo(player.level(), stage.getX() + x, stage.getY() + y, stage.getZ() + z, java.util.Set.of(), yaw, pitch, true);
   }
 
   /** A truck of the tier with the block on it */
@@ -144,16 +143,16 @@ public final class ClientScene {
       p.getInventory().clearContent();
       p.getInventory().setItem(0, loaded(TransporterTier.IRON, Blocks.CHEST, 1));
       p.setItemSlot(net.minecraft.world.entity.EquipmentSlot.OFFHAND, loaded(TransporterTier.DIAMOND, Blocks.BARREL, 1));
-      p.getInventory().selected = 0;
+      p.getInventory().setSelectedSlot(0);
     }));
     at(t += 20, mc -> shot(mc, "pose_first"));
     at(t += 5, mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
     at(t += 15, mc -> shot(mc, "pose_third_front"));
-    at(t += 5, mc -> server(mc, p -> p.teleportTo(p.serverLevel(), p.getX(), p.getY(), p.getZ(), -90, 10)));
+    at(t += 5, mc -> server(mc, p -> p.teleportTo(p.level(), p.getX(), p.getY(), p.getZ(), java.util.Set.of(), -90, 10, true)));
     at(t += 15, mc -> shot(mc, "pose_third_side"));
     at(t += 5, mc -> {
-      mc.level.disconnect();
-      mc.disconnect(new TitleScreen());
+      mc.level.disconnect(Component.empty());
+      mc.disconnect(new TitleScreen(), false);
       mc.stop();
     });
   }
@@ -164,8 +163,8 @@ public final class ClientScene {
     at(t += 20, mc -> shot(mc, "icon"));
     at(t += 5, mc -> {
       mc.setScreen(null);
-      mc.level.disconnect();
-      mc.disconnect(new TitleScreen());
+      mc.level.disconnect(Component.empty());
+      mc.disconnect(new TitleScreen(), false);
       mc.stop();
     });
   }
@@ -183,11 +182,11 @@ public final class ClientScene {
     public void render(net.minecraft.client.gui.GuiGraphics g, int mouseX, int mouseY, float partialTick) {
       g.fill(0, 0, width, height, 0xFF1F1520);
       float s = Math.min(width, height) / 16f * 0.85f;
-      g.pose().pushPose();
-      g.pose().translate(width / 2f - 8 * s, height / 2f - 8 * s, 0);
-      g.pose().scale(s, s, 1);
+      g.pose().pushMatrix();
+      g.pose().translate(width / 2f - 8 * s, height / 2f - 8 * s);
+      g.pose().scale(s, s);
       g.renderItem(stack, 0, 0);
-      g.pose().popPose();
+      g.pose().popMatrix();
     }
 
     @Override
@@ -213,7 +212,7 @@ public final class ClientScene {
       p.getInventory().setItem(8, loaded(TransporterTier.NETHERITE, Blocks.SPAWNER, 0));
       p.getInventory().setItem(9, loaded(TransporterTier.GOLDEN, Blocks.TRAPPED_CHEST, 1));
       p.getInventory().setItem(10, loaded(TransporterTier.COPPER, Blocks.CHEST, 0));
-      p.getInventory().selected = 6;
+      p.getInventory().setSelectedSlot(6);
     }));
     // survival: the inventory screen instead of the creative tabs
     at(t += 10, mc -> server(mc, p -> p.setGameMode(GameType.SURVIVAL)));
@@ -233,17 +232,17 @@ public final class ClientScene {
     });
     // in the hand, first person
     at(t += 10, mc -> {
-      mc.player.getInventory().selected = 6;
+      mc.player.getInventory().setSelectedSlot(6);
       shot(mc, "hand_chest");
       checkNoMissingTexture(mc, "hand");
     });
-    at(t += 10, mc -> mc.player.getInventory().selected = 7);
+    at(t += 10, mc -> mc.player.getInventory().setSelectedSlot(7));
     at(t += 10, mc -> shot(mc, "hand_barrel"));
-    at(t += 10, mc -> mc.player.getInventory().selected = 2);
+    at(t += 10, mc -> mc.player.getInventory().setSelectedSlot(2));
     at(t += 10, mc -> shot(mc, "hand_empty"));
     // third person from the front
     at(t += 5, mc -> {
-      mc.player.getInventory().selected = 6;
+      mc.player.getInventory().setSelectedSlot(6);
       mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);
     });
     at(t += 15, mc -> {
@@ -261,8 +260,8 @@ public final class ClientScene {
     at(t += 5, ClientScene::checkTranslations);
     at(t += 10, mc -> {
       ChestTransporter.LOG.info("[scene] DONE " + (checks - failures) + "/" + checks + (failures == 0 ? " passed" : " (" + failures + " failed)"));
-      mc.level.disconnect();
-      mc.disconnect(new TitleScreen());
+      mc.level.disconnect(Component.empty());
+      mc.disconnect(new TitleScreen(), false);
       mc.stop();
     });
   }
@@ -291,12 +290,12 @@ public final class ClientScene {
         return;
       }
       opened = true;
-      GLFW.glfwSetWindowSize(mc.getWindow().getWindow(), 1600, 900);
+      GLFW.glfwSetWindowSize(mc.getWindow().handle(), 1600, 900);
       mc.options.guiScale().set(3);
       mc.options.cloudStatus().set(CloudStatus.OFF);
       mc.options.pauseOnLostFocus = false;
       mc.resizeDisplay();
-      LevelSettings settings = new LevelSettings(WORLD, GameType.CREATIVE, false, Difficulty.PEACEFUL, true, new GameRules(), WorldDataConfiguration.DEFAULT);
+      LevelSettings settings = new LevelSettings(WORLD, GameType.CREATIVE, false, Difficulty.PEACEFUL, true, new GameRules(net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS), WorldDataConfiguration.DEFAULT);
       mc.createWorldOpenFlows().createFreshLevel(WORLD, settings, new WorldOptions(20261016L, false, false), WorldPresets::createNormalWorldDimensions, new TitleScreen());
       return;
     }
@@ -305,7 +304,7 @@ public final class ClientScene {
     }
     mc.options.pauseOnLostFocus = false;
     mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
-    mc.getToasts().clear();
+    mc.getToastManager().clear();
     if (mc.screen instanceof PauseScreen) {
       mc.setScreen(null);
     }
@@ -324,13 +323,13 @@ public final class ClientScene {
 
   /** Grass floor in the sky, trucks on the ground and in item frames on a wall */
   private static void build(ServerPlayer player) {
-    ServerLevel level = player.serverLevel();
-    BlockPos spawn = level.getSharedSpawnPos();
+    ServerLevel level = player.level();
+    BlockPos spawn = level.getRespawnData().pos();
     stage = new BlockPos(spawn.getX(), 140, spawn.getZ());
     level.setDayTime(6000);
-    level.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false, level.getServer());
-    level.getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(false, level.getServer());
-    level.getGameRules().getRule(GameRules.RULE_DOMOBSPAWNING).set(false, level.getServer());
+    level.getGameRules().set(GameRules.ADVANCE_TIME, false, level.getServer());
+    level.getGameRules().set(GameRules.ADVANCE_WEATHER, false, level.getServer());
+    level.getGameRules().set(GameRules.SPAWN_MOBS, false, level.getServer());
     for (BlockPos pos : BlockPos.betweenClosed(stage.offset(-6, -1, -6), stage.offset(10, 6, 8))) {
       level.setBlock(pos, pos.getY() == stage.getY() - 1 ? Blocks.GRASS_BLOCK.defaultBlockState() : Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
     }
@@ -358,20 +357,16 @@ public final class ClientScene {
     lookAt(player, 0.5, 0, -3, 0.5, 1, 3);
   }
 
+  /** Each truck has its item model: the frame and the load renderer ({@code assets/chest_transporter/items}) */
   private static void checkModels(Minecraft mc) {
-    BakedModel missing = mc.getModelManager().getMissingModel();
     List<String> bad = new ArrayList<>();
     for (TransporterTier tier : TransporterTier.values()) {
-      if (dev.vladeezyy.chesttransporter.platform.ClientPlatform.get().frameModel(tier) == missing) {
-        bad.add(tier.itemName() + "_frame");
-      }
-      Item item = ModRegistry.truck(tier);
-      BakedModel model = mc.getItemRenderer().getModel(new ItemStack(item), null, null, 0);
-      if (model == missing || !model.isCustomRenderer()) {
-        bad.add(tier.itemName());
+      var model = mc.getModelManager().getItemModel(BuiltInRegistries.ITEM.getKey(ModRegistry.truck(tier)));
+      if (!(model instanceof net.minecraft.client.renderer.item.CompositeModel)) {
+        bad.add(tier.itemName() + ": " + model.getClass().getSimpleName());
       }
     }
-    check("every truck has its frame model and the item renderer", bad.isEmpty(), bad);
+    check("every truck has its item model with the frame and the load", bad.isEmpty(), bad);
   }
 
   private static void checkTooltip(Minecraft mc) {
@@ -414,17 +409,19 @@ public final class ClientScene {
     check("translations: no unused keys in " + LANG, unused.isEmpty(), unused);
   }
 
-  /** The missing texture is magenta and black: count magenta pixels of the frame */
+  /** The missing texture is magenta and black: count magenta pixels of the frame (read after the frame is drawn) */
   private static void checkNoMissingTexture(Minecraft mc, String name) {
-    int magenta = 0;
-    try (NativeImage image = Screenshot.takeScreenshot(mc.getMainRenderTarget())) {
-      for (int pixel : image.getPixelsRGBA()) {
-        int r = pixel & 0xFF, g = pixel >> 8 & 0xFF, b = pixel >> 16 & 0xFF;
-        if (r > 200 && b > 200 && g < 40) {
-          magenta++;
+    Screenshot.takeScreenshot(mc.getMainRenderTarget(), image -> {
+      int magenta = 0;
+      try (image) {
+        for (int pixel : image.getPixels()) {
+          int r = pixel >> 16 & 0xFF, g = pixel >> 8 & 0xFF, b = pixel & 0xFF;
+          if (r > 200 && b > 200 && g < 40) {
+            magenta++;
+          }
         }
       }
-    }
-    check(name + ": no missing texture on screen", magenta < 50, magenta + " magenta pixels");
+      check(name + ": no missing texture on screen", magenta < 50, magenta + " magenta pixels");
+    });
   }
 }

@@ -5,7 +5,7 @@ import dev.vladeezyy.chesttransporter.selftest.NetScene;
 import dev.vladeezyy.chesttransporter.selftest.StressScene;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 
 public final class FabricTestHooksClient implements ClientModInitializer {
   @Override
@@ -16,6 +16,6 @@ public final class FabricTestHooksClient implements ClientModInitializer {
       NetScene.onClientTick();
     });
     // one world render per frame while in a world, which is when the stress scene counts frames
-    WorldRenderEvents.END.register(context -> StressScene.onFrame());
+    WorldRenderEvents.END_MAIN.register(context -> StressScene.onFrame());
   }
 }

@@ -28,7 +28,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemContainerContents;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
@@ -181,7 +181,7 @@ public final class StressScene {
       ItemStack held = mc.player.getMainHandItem();
       CarriedBlock carried = held.get(ModRegistry.carried());
       check("chest of 27 full shulker boxes reached the client on the truck", carried != null
-        && carried.data().getList("Items", Tag.TAG_COMPOUND).size() == 27, carried == null ? "nothing" : carried.data().sizeInBytes());
+        && carried.data().getListOrEmpty("Items").size() == 27, carried == null ? "nothing" : carried.data().sizeInBytes());
       if (carried != null) {
         ChestTransporter.LOG.info("[scene] PERF heavy load: " + carried.data().sizeInBytes() / 1024 + " KiB of block data");
       }
@@ -196,30 +196,30 @@ public final class StressScene {
       at(i, mc -> server(mc, StressScene::churn));
     }
     at(t = churnStart + 205, mc -> server(mc, p -> {
-      long after = countItems(p.serverLevel());
+      long after = countItems(p.level());
       check("800 moves: no item lost or duplicated", after == itemsBefore, after + " vs " + itemsBefore);
     }));
     // extremes
     at(t += 5, mc -> server(mc, p -> {
       TransporterConfig.server().spawnerTiers = List.of();
-      p.serverLevel().setBlockAndUpdate(stage.offset(0, 0, 6), Blocks.SPAWNER.defaultBlockState());
+      p.level().setBlockAndUpdate(stage.offset(0, 0, 6), Blocks.SPAWNER.defaultBlockState());
       use(p, stage.offset(0, 0, 6), new ItemStack(ModRegistry.truck(TransporterTier.NETHERITE)));
-      check("empty spawner tier list: no truck takes spawners", p.serverLevel().getBlockState(stage.offset(0, 0, 6)).is(Blocks.SPAWNER), "taken");
+      check("empty spawner tier list: no truck takes spawners", p.level().getBlockState(stage.offset(0, 0, 6)).is(Blocks.SPAWNER), "taken");
       TransporterConfig.server().reset();
     }));
     // leave with a loaded truck and come back
     at(t += 5, mc -> server(mc, p -> {
       ItemStack truck = new ItemStack(ModRegistry.truck(TransporterTier.DIAMOND));
-      p.serverLevel().setBlockAndUpdate(stage.offset(2, 0, 6), Blocks.BARREL.defaultBlockState());
-      ((Container) p.serverLevel().getBlockEntity(stage.offset(2, 0, 6))).setItem(0, new ItemStack(Items.TNT, 17));
+      p.level().setBlockAndUpdate(stage.offset(2, 0, 6), Blocks.BARREL.defaultBlockState());
+      ((Container) p.level().getBlockEntity(stage.offset(2, 0, 6))).setItem(0, new ItemStack(Items.TNT, 17));
       use(p, stage.offset(2, 0, 6), truck);
       p.getInventory().setItem(30, p.getMainHandItem().copy());
       p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
     }));
     at(t += 20, mc -> {
       rejoining = true;
-      mc.level.disconnect();
-      mc.disconnect(new TitleScreen());
+      mc.level.disconnect(net.minecraft.network.chat.Component.empty());
+      mc.disconnect(new TitleScreen(), false);
     });
     afterRejoin(40, mc -> {
       CarriedBlock carried = mc.player.getInventory().getItem(30).get(ModRegistry.carried());
@@ -230,13 +230,13 @@ public final class StressScene {
         p.getInventory().setItem(30, ItemStack.EMPTY);
         use(p, stage.offset(4, -1, 6), p.getMainHandItem());
         BlockPos placed = stage.offset(4, 0, 6);
-        check("barrel put down after rejoining with its TNT", p.serverLevel().getBlockEntity(placed) instanceof Container c && c.getItem(0).getCount() == 17, p.serverLevel().getBlockState(placed));
+        check("barrel put down after rejoining with its TNT", p.level().getBlockEntity(placed) instanceof Container c && c.getItem(0).getCount() == 17, p.level().getBlockState(placed));
       });
     });
     afterRejoin(50, mc -> {
       ChestTransporter.LOG.info("[scene] DONE " + (checks - failures) + "/" + checks + (failures == 0 ? " passed" : " (" + failures + " failed)"));
-      mc.level.disconnect();
-      mc.disconnect(new TitleScreen());
+      mc.level.disconnect(net.minecraft.network.chat.Component.empty());
+      mc.disconnect(new TitleScreen(), false);
       mc.stop();
     });
   }
@@ -265,14 +265,14 @@ public final class StressScene {
     }
     if (!opened && mc.screen instanceof TitleScreen) {
       opened = true;
-      GLFW.glfwSetWindowSize(mc.getWindow().getWindow(), 1600, 900);
+      GLFW.glfwSetWindowSize(mc.getWindow().handle(), 1600, 900);
       mc.options.guiScale().set(3);
       mc.options.cloudStatus().set(CloudStatus.OFF);
       mc.options.framerateLimit().set(260);
       mc.options.enableVsync().set(false);
       mc.options.pauseOnLostFocus = false;
       mc.resizeDisplay();
-      LevelSettings settings = new LevelSettings(WORLD, GameType.SURVIVAL, false, Difficulty.PEACEFUL, true, new GameRules(), WorldDataConfiguration.DEFAULT);
+      LevelSettings settings = new LevelSettings(WORLD, GameType.SURVIVAL, false, Difficulty.PEACEFUL, true, new GameRules(net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS), WorldDataConfiguration.DEFAULT);
       mc.createWorldOpenFlows().createFreshLevel(WORLD, settings, new WorldOptions(20261016L, false, false), WorldPresets::createNormalWorldDimensions, new TitleScreen());
       return;
     }
@@ -287,7 +287,7 @@ public final class StressScene {
     }
     mc.options.pauseOnLostFocus = false;
     mc.getTutorial().setStep(net.minecraft.client.tutorial.TutorialSteps.NONE);
-    mc.getToasts().clear();
+    mc.getToastManager().clear();
     if (mc.screen instanceof PauseScreen) {
       mc.setScreen(null);
     }
@@ -309,16 +309,16 @@ public final class StressScene {
   static void use(ServerPlayer player, BlockPos pos, ItemStack stack) {
     player.setItemInHand(InteractionHand.MAIN_HAND, stack);
     BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(pos).relative(Direction.UP, 0.5), Direction.UP, pos, false);
-    player.gameMode.useItemOn(player, player.serverLevel(), stack, InteractionHand.MAIN_HAND, hit);
+    player.gameMode.useItemOn(player, player.level(), stack, InteractionHand.MAIN_HAND, hit);
   }
 
   private static void floor(ServerPlayer player) {
-    ServerLevel level = player.serverLevel();
-    BlockPos spawn = level.getSharedSpawnPos();
+    ServerLevel level = player.level();
+    BlockPos spawn = level.getRespawnData().pos();
     stage = new BlockPos(spawn.getX(), 150, spawn.getZ());
     level.setDayTime(6000);
-    level.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false, level.getServer());
-    level.getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(false, level.getServer());
+    level.getGameRules().set(GameRules.ADVANCE_TIME, false, level.getServer());
+    level.getGameRules().set(GameRules.ADVANCE_WEATHER, false, level.getServer());
     for (BlockPos pos : BlockPos.betweenClosed(stage.offset(-10, -1, -4), stage.offset(20, 8, 20))) {
       level.setBlock(pos, pos.getY() == stage.getY() - 1 ? Blocks.SMOOTH_STONE.defaultBlockState() : Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
     }
@@ -327,13 +327,13 @@ public final class StressScene {
         level.setBlock(stage.offset(x, y, 16), Blocks.STONE.defaultBlockState(), Block.UPDATE_CLIENTS);
       }
     }
-    player.teleportTo(level, stage.getX() + 5.5, stage.getY(), stage.getZ() - 2.5, 0, 25);
+    player.teleportTo(level, stage.getX() + 5.5, stage.getY(), stage.getZ() - 2.5, java.util.Set.of(), 0, 25, true);
   }
 
   /** 64 items on the floor and 64 item frames on the wall: vanilla chests, or loaded trucks */
   private static void showcase(ServerPlayer player, boolean trucks) {
     clearShowcase(player);
-    ServerLevel level = player.serverLevel();
+    ServerLevel level = player.level();
     TransporterTier[] tiers = TransporterTier.values();
     Block[] loads = {Blocks.CHEST, Blocks.BARREL, Blocks.TRAPPED_CHEST, Blocks.SPAWNER};
     for (int i = 0; i < 64; i++) {
@@ -350,7 +350,7 @@ public final class StressScene {
   }
 
   private static void clearShowcase(ServerPlayer player) {
-    for (Entity entity : player.serverLevel().getEntitiesOfClass(Entity.class, new AABB(stage).inflate(30), e -> e instanceof ItemEntity || e instanceof ItemFrame)) {
+    for (Entity entity : player.level().getEntitiesOfClass(Entity.class, new AABB(stage).inflate(30), e -> e instanceof ItemEntity || e instanceof ItemFrame)) {
       entity.discard();
     }
   }
@@ -362,7 +362,7 @@ public final class StressScene {
   }
 
   private static void heavyPickUp(ServerPlayer player) {
-    ServerLevel level = player.serverLevel();
+    ServerLevel level = player.level();
     BlockPos pos = stage.offset(0, 0, 0);
     level.setBlockAndUpdate(pos, Blocks.CHEST.defaultBlockState());
     ChestBlockEntity chest = (ChestBlockEntity) level.getBlockEntity(pos);
@@ -383,7 +383,7 @@ public final class StressScene {
   private static void heavyPutDown(ServerPlayer player) {
     use(player, stage.offset(0, -1, 2), player.getMainHandItem());
     heavyCount = 0;
-    if (player.serverLevel().getBlockEntity(stage.offset(0, 0, 2)) instanceof ChestBlockEntity chest) {
+    if (player.level().getBlockEntity(stage.offset(0, 0, 2)) instanceof ChestBlockEntity chest) {
       for (int i = 0; i < 27; i++) {
         for (ItemStack ignored : chest.getItem(i).getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY).nonEmptyItems()) {
           heavyCount++;
@@ -397,7 +397,7 @@ public final class StressScene {
   private static final List<ItemStack> trucks = new ArrayList<>();
 
   private static void churnSetup(ServerPlayer player) {
-    ServerLevel level = player.serverLevel();
+    ServerLevel level = player.level();
     slots.clear();
     trucks.clear();
     for (int row = 0; row < 4; row++) {
@@ -421,7 +421,7 @@ public final class StressScene {
 
   /** Each row: the truck picks up a random block of the row, or puts its load down on a free spot of the row */
   private static void churn(ServerPlayer player) {
-    ServerLevel level = player.serverLevel();
+    ServerLevel level = player.level();
     for (int row = 0; row < 4; row++) {
       ItemStack truck = trucks.get(row);
       // repair as it goes: the test is about the contents, not the durability
@@ -452,8 +452,8 @@ public final class StressScene {
     for (ItemStack truck : trucks) {
       CarriedBlock carried = truck.get(ModRegistry.carried());
       if (carried != null) {
-        for (Tag tag : carried.data().getList("Items", Tag.TAG_COMPOUND)) {
-          count += ((net.minecraft.nbt.CompoundTag) tag).getInt("count");
+        for (Tag tag : carried.data().getListOrEmpty("Items")) {
+          count += ((net.minecraft.nbt.CompoundTag) tag).getIntOr("count", 0);
         }
       }
     }

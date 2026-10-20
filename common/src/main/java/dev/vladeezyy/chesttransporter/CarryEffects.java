@@ -1,7 +1,7 @@
 package dev.vladeezyy.chesttransporter;
 
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -18,9 +18,9 @@ import java.util.WeakHashMap;
  * strength 0.34 lifts the player 0.86 blocks), faster hunger. Runs on both sides: movement is predicted by the client.
  */
 public final class CarryEffects {
-  public static final ResourceLocation SLOWNESS = ChestTransporter.id("carrying_slowness");
-  public static final ResourceLocation FATIGUE = ChestTransporter.id("carrying_mining_fatigue");
-  public static final ResourceLocation JUMP = ChestTransporter.id("carrying_jump");
+  public static final Identifier SLOWNESS = ChestTransporter.id("carrying_slowness");
+  public static final Identifier FATIGUE = ChestTransporter.id("carrying_mining_fatigue");
+  public static final Identifier JUMP = ChestTransporter.id("carrying_jump");
   /** Exhaustion per tick, the same as the Hunger I effect */
   private static final float EXHAUSTION = 0.005f;
 
@@ -36,7 +36,7 @@ public final class CarryEffects {
   private static final Map<Player, State> SERVER_STATES = new WeakHashMap<>();
 
   private static Map<Player, State> states(Player player) {
-    return player.level().isClientSide ? CLIENT_STATES : SERVER_STATES;
+    return player.level().isClientSide() ? CLIENT_STATES : SERVER_STATES;
   }
 
   private static final class State {
@@ -54,11 +54,11 @@ public final class CarryEffects {
       state.carrying = isCarrying(player);
     }
     boolean loaded = state.carrying && !player.getAbilities().instabuild && !player.isSpectator();
-    TransporterConfig config = TransporterConfig.forSide(player.level().isClientSide);
+    TransporterConfig config = TransporterConfig.forSide(player.level().isClientSide());
     apply(player, Attributes.MOVEMENT_SPEED, SLOWNESS, loaded && config.slowness, -0.3, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
     apply(player, Attributes.BLOCK_BREAK_SPEED, FATIGUE, loaded && config.miningFatigue, -0.5, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
     apply(player, Attributes.JUMP_STRENGTH, JUMP, loaded && config.noJump, -0.08, AttributeModifier.Operation.ADD_VALUE);
-    if (loaded && !player.level().isClientSide && config.hunger) {
+    if (loaded && !player.level().isClientSide() && config.hunger) {
       player.causeFoodExhaustion(EXHAUSTION);
     }
   }
@@ -83,7 +83,7 @@ public final class CarryEffects {
     return false;
   }
 
-  private static void apply(Player player, Holder<Attribute> attribute, ResourceLocation id, boolean on, double amount, AttributeModifier.Operation operation) {
+  private static void apply(Player player, Holder<Attribute> attribute, Identifier id, boolean on, double amount, AttributeModifier.Operation operation) {
     AttributeInstance instance = player.getAttribute(attribute);
     if (instance == null) {
       return;

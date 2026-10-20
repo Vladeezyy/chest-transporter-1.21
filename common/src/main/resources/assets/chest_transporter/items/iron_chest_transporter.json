@@ -1,0 +1,18 @@
+{
+  "model": {
+    "type": "minecraft:composite",
+    "models": [
+      {
+        "type": "minecraft:model",
+        "model": "chest_transporter:item/iron_chest_transporter"
+      },
+      {
+        "type": "minecraft:special",
+        "base": "chest_transporter:item/iron_chest_transporter",
+        "model": {
+          "type": "chest_transporter:load"
+        }
+      }
+    ]
+  }
+}

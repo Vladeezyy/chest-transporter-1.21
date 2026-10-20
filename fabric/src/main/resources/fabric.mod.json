@@ -16,6 +16,7 @@
     "main": ["dev.vladeezyy.chesttransporter.fabric.ChestTransporterFabric"],
     "client": ["dev.vladeezyy.chesttransporter.fabric.ChestTransporterFabricClient"]
   },
+  "accessWidener": "chest_transporter.accesswidener",
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",
     "fabric-api": "*",
